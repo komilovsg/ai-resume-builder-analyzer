@@ -1,8 +1,13 @@
+import { buildContactSegments } from "../utils/contact";
+
 interface ResumeModernProps {
   resumeData: ResumeData;
+  variant?: "page" | "card";
 }
 
-export default function ResumeModern({ resumeData }: ResumeModernProps) {
+export default function ResumeModern({ resumeData, variant = "page" }: ResumeModernProps) {
+  const contactSegments = buildContactSegments(resumeData);
+  const isInteractive = variant === "page";
   const formatDate = (date: string | null) => {
     if (!date) return "По настоящее время";
     const [year, month] = date.split("-");
@@ -20,14 +25,40 @@ export default function ResumeModern({ resumeData }: ResumeModernProps) {
   };
 
   return (
-    <div className="resume-modern">
+    <div className="resume-document resume-modern">
       {/* Header */}
       <header className="mb-8 pb-6 border-b-2 border-gray-300">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        {resumeData.fullName && (
+          <h1 className="text-4xl font-bold text-gray-900 tracking-wide mb-1">
+            {resumeData.fullName}
+          </h1>
+        )}
+        <p className="text-2xl font-semibold text-gray-700 uppercase tracking-wide">
           {resumeData.title}
-        </h1>
+        </p>
+        {contactSegments.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-y-2 text-sm uppercase tracking-wide text-gray-600">
+            {contactSegments.map((segment, index) => (
+              <div key={`${segment.text}-${index}`} className="flex items-center gap-2">
+                {index > 0 && <span className="text-gray-400">•</span>}
+                {isInteractive && segment.href ? (
+                  <a
+                    href={segment.href}
+                    className="hover:text-blue-600 transition-colors break-all"
+                  >
+                    {segment.isBracketed ? `[${segment.text}]` : segment.text}
+                  </a>
+                ) : (
+                  <span className="break-all">
+                    {segment.isBracketed ? `[${segment.text}]` : segment.text}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         {resumeData.about && (
-          <p className="text-gray-600 text-lg leading-relaxed">
+          <p className="mt-4 text-gray-600 text-lg leading-relaxed">
             {resumeData.about}
           </p>
         )}

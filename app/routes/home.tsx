@@ -5,6 +5,8 @@ import ResumeCardNew from "~/components/ResumeCardNew";
 import { Link, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { usePuterStore } from "~/lib/puter";
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,6 +16,9 @@ export function meta({}: Route.MetaArgs) {
 }
 
 // Helper function to check if resume is old format (with feedback) or new format (ResumeData)
+type StoredOldResume = Resume & { storageKey: string };
+type StoredNewResume = ResumeData & { storageKey: string };
+
 const isOldResume = (resume: any): resume is Resume => {
   return resume.feedback !== undefined && resume.imagePath !== undefined;
 };
@@ -25,9 +30,10 @@ const isNewResume = (resume: any): resume is ResumeData => {
 export default function Home() {
   const { auth, kv } = usePuterStore();
   const navigate = useNavigate();
-  const [oldResumes, setOldResumes] = useState<Resume[]>([]);
-  const [newResumes, setNewResumes] = useState<ResumeData[]>([]);
+  const [oldResumes, setOldResumes] = useState<StoredOldResume[]>([]);
+  const [newResumes, setNewResumes] = useState<StoredNewResume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
+  const [deletingKey, setDeletingKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.isAuthenticated) navigate("/auth?next=/");
@@ -42,16 +48,16 @@ export default function Home() {
       try {
         const resumes = (await kv.list("resume:*", true)) as KVItem[];
 
-        const old: Resume[] = [];
-        const new_: ResumeData[] = [];
+        const old: StoredOldResume[] = [];
+        const new_: StoredNewResume[] = [];
 
         resumes?.forEach((item) => {
           try {
             const parsed = JSON.parse(item.value);
             if (isOldResume(parsed)) {
-              old.push(parsed);
+              old.push({ ...parsed, storageKey: item.key });
             } else if (isNewResume(parsed)) {
-              new_.push(parsed);
+              new_.push({ ...parsed, storageKey: item.key });
             }
           } catch (error) {
             console.error("Error parsing resume:", error);
@@ -72,17 +78,108 @@ export default function Home() {
     }
   }, [auth.isAuthenticated, kv]);
 
+  const showToast = (message: string, type: "success" | "error") => {
+    Toastify({
+      text: message,
+      duration: 3500,
+      gravity: "top",
+      position: "right",
+      style: {
+        background:
+          type === "success"
+            ? "linear-gradient(135deg, #36cfc9, #6dd178)"
+            : "linear-gradient(135deg, #ff5f6d, #ffc371)",
+      },
+    }).showToast();
+  };
+
+  const handleDeleteResume = async (storageKey: string) => {
+    if (!confirm("Удалить это резюме? Его нельзя будет восстановить.")) {
+      return;
+    }
+
+    setDeletingKey(storageKey);
+    try {
+      const result = await kv.delete(storageKey);
+      if (!result) {
+        throw new Error("KV delete returned false");
+      }
+
+      setOldResumes((prev) =>
+        prev.filter((resume) => resume.storageKey !== storageKey)
+      );
+      setNewResumes((prev) =>
+        prev.filter((resume) => resume.storageKey !== storageKey)
+      );
+
+      showToast("Резюме удалено", "success");
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      showToast("Не удалось удалить резюме. Попробуйте позже", "error");
+    } finally {
+      setDeletingKey(null);
+    }
+  };
+
   return (
     <main className="bg-[url('/images/bg-main.svg')] bg-cover">
       <Navbar />
       <section className="main-section">
-        <div className="page-heading py-16">
-          <h1>Мои резюме</h1>
+        <div className="page-heading page-heading--compact py-12">
+          <h1 className="text-[2.75rem] leading-tight">Мои резюме</h1>
           {!loadingResumes && oldResumes.length === 0 && newResumes.length === 0 ? (
-            <h2>Резюме не найдено. Создайте или загрузите первое резюме</h2>
+            <h2 className="text-2xl text-dark-200">
+              Резюме не найдено. Создайте или загрузите первое резюме
+            </h2>
           ) : (
-            <h2>Просмотрите ваши резюме и созданные шаблоны</h2>
+            <h2 className="text-2xl text-dark-200">
+              Просмотрите сохранённые шаблоны и запускайте оценку в один клик
+            </h2>
           )}
+          <div className="home-cta mt-8">
+            <div className="home-cta__text">
+              <p className="text-sm text-gray-600">
+                Создайте новое резюме с нуля или загрузите готовый PDF, чтобы получить ATS-оценку и советы
+              </p>
+            </div>
+            <div className="home-cta__actions">
+              <Link to="/create" className="primary-button home-cta__btn">
+                <span className="home-cta__icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M8 3.333v9.334M3.333 8h9.334"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <p>Создать резюме</p>
+              </Link>
+              <Link to="/upload" className="secondary-button home-cta__btn">
+                <span className="home-cta__icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M10.667 1.333H4A1.333 1.333 0 0 0 2.667 2.667v10.666A1.333 1.333 0 0 0 4 14.667h8a1.333 1.333 0 0 0 1.333-1.334V5.333L10.667 1.333Z"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10.667 1.333V5.333h3.333M8 8v3.333M6.667 9.333 8 8l1.333 1.333"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <p>Загрузить и оценить резюме</p>
+              </Link>
+            </div>
+          </div>
         </div>
         {loadingResumes && (
           <div>
@@ -101,7 +198,12 @@ export default function Home() {
                 <h2 className="text-2xl font-bold mb-4">Проанализированные резюме</h2>
                 <div className="resumes-section">
                   {oldResumes.map((resume) => (
-                    <ResumeCard key={resume.id} resume={resume} />
+                    <ResumeCard
+                      key={resume.storageKey}
+                      resume={resume}
+                      onDelete={handleDeleteResume}
+                      isDeleting={deletingKey === resume.storageKey}
+                    />
                   ))}
                 </div>
               </div>
@@ -112,7 +214,12 @@ export default function Home() {
                 <h2 className="text-2xl font-bold mb-4">Созданные резюме</h2>
                 <div className="resumes-section">
                   {newResumes.map((resume) => (
-                    <ResumeCardNew key={resume.id} resume={resume} />
+                    <ResumeCardNew
+                      key={resume.storageKey}
+                      resume={resume}
+                      onDelete={handleDeleteResume}
+                      isDeleting={deletingKey === resume.storageKey}
+                    />
                   ))}
                 </div>
               </div>
@@ -120,33 +227,6 @@ export default function Home() {
           </>
         )}
 
-        {!loadingResumes && oldResumes.length === 0 && newResumes.length === 0 && (
-          <div className="flex flex-col items-center justify-center mt-10 gap-4">
-            <Link
-              to="/create"
-              className="primary-button w-fit text-xl font-semibold"
-            >
-              Создать резюме
-            </Link>
-            <Link
-              to="/upload"
-              className="secondary-button w-fit text-xl font-semibold"
-            >
-              Загрузить резюме для анализа
-            </Link>
-          </div>
-        )}
-
-        {!loadingResumes && (oldResumes.length > 0 || newResumes.length > 0) && (
-          <div className="flex flex-col items-center justify-center mt-10 gap-4">
-            <Link
-              to="/create"
-              className="primary-button w-fit text-xl font-semibold"
-            >
-              Создать новое резюме
-            </Link>
-          </div>
-        )}
       </section>
     </main>
   );

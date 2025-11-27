@@ -1,8 +1,13 @@
+import { buildContactSegments } from "../utils/contact";
+
 interface ResumeClassicProps {
   resumeData: ResumeData;
+  variant?: "page" | "card";
 }
 
-export default function ResumeClassic({ resumeData }: ResumeClassicProps) {
+export default function ResumeClassic({ resumeData, variant = "page" }: ResumeClassicProps) {
+  const contactSegments = buildContactSegments(resumeData);
+  const isInteractive = variant === "page";
   const formatDate = (date: string | null) => {
     if (!date) return "По настоящее время";
     const [year, month] = date.split("-");
@@ -20,14 +25,35 @@ export default function ResumeClassic({ resumeData }: ResumeClassicProps) {
   };
 
   return (
-    <div className="resume-classic">
+    <div className="resume-document resume-classic">
       {/* Header */}
       <header className="mb-8 text-center">
-        <h1 className="text-5xl font-bold text-gray-900 mb-4 uppercase tracking-wide">
+        {resumeData.fullName && (
+          <h1 className="text-5xl font-bold text-gray-900 mb-2 uppercase tracking-wide">
+            {resumeData.fullName}
+          </h1>
+        )}
+        <p className="text-2xl font-semibold text-gray-800 uppercase tracking-[0.4em]">
           {resumeData.title}
-        </h1>
+        </p>
+        {contactSegments.length > 0 && (
+          <div className="mt-4 flex flex-wrap justify-center gap-x-3 gap-y-2 text-xs font-semibold text-gray-700 tracking-wide uppercase">
+            {contactSegments.map((segment, index) => (
+              <div key={`${segment.text}-${index}`} className="flex items-center gap-2">
+                {index > 0 && <span className="text-gray-400">•</span>}
+                {isInteractive && segment.href ? (
+                  <a href={segment.href} className="hover:text-blue-600 transition-colors">
+                    {segment.isBracketed ? `[${segment.text}]` : segment.text}
+                  </a>
+                ) : (
+                  <span>{segment.isBracketed ? `[${segment.text}]` : segment.text}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         {resumeData.about && (
-          <div className="border-t-2 border-b-2 border-gray-900 py-4">
+          <div className="mt-4 border-t-2 border-b-2 border-gray-900 py-4">
             <p className="text-gray-700 text-base leading-relaxed">
               {resumeData.about}
             </p>

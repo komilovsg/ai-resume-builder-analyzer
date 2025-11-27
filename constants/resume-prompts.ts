@@ -75,10 +75,26 @@ export const generateResumePrompt = (
 ): string => {
   return `You are an expert resume writer. Create a comprehensive, professional resume based on the following information:
 
+FULL NAME:
+${resumeData.fullName}
+
 PROFESSION/TITLE: ${resumeData.title}
+
+LOCATION:
+${resumeData.location || "Not provided"}
 
 ABOUT:
 ${resumeData.about}
+
+CONTACTS:
+${[
+    resumeData.email && `Email: ${resumeData.email}`,
+    resumeData.phone && `Phone: ${resumeData.phone}`,
+    resumeData.linkedin && `LinkedIn: ${resumeData.linkedin}`,
+    resumeData.telegram && `Telegram: ${resumeData.telegram}`,
+  ]
+    .filter(Boolean)
+    .join("\n") || "Not provided"}
 
 EXPERIENCE:
 ${resumeData.experiences.map((exp) => `

@@ -4,8 +4,16 @@ import { useResumeStore } from "~/lib/resume-store";
 import { generateExperienceDescription } from "~/lib/resume-ai";
 
 export default function StepExperience() {
-  const { resumeData, addExperience, removeExperience, updateExperience, nextStep, prevStep, setGenerating, isGenerating } =
-    useResumeStore();
+  const {
+    resumeData,
+    addExperience,
+    removeExperience,
+    updateExperience,
+    nextStep,
+    prevStep,
+    setGenerating,
+    isGenerating,
+  } = useResumeStore();
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -17,17 +25,40 @@ export default function StepExperience() {
 
   const experiences = resumeData.experiences || [];
 
-  const handleAddExperience = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const resetForm = () => {
+    setCompany("");
+    setPosition("");
+    setStartDate("");
+    setEndDate("");
+    setIsPresent(false);
+    setRawDescription("");
+    setGeneratedDescription("");
+    setEditingId(null);
+  };
+
+  const hasPendingData = Boolean(
+    company.trim() ||
+      position.trim() ||
+      startDate ||
+      endDate ||
+      rawDescription.trim() ||
+      generatedDescription ||
+      editingId
+  );
+
+  const persistExperience = () => {
+    if (!hasPendingData) {
+      return true;
+    }
 
     if (!company.trim() || !position.trim() || !startDate) {
-      alert("Заполните все обязательные поля");
-      return;
+      alert("Заполните все обязательные поля перед продолжением");
+      return false;
     }
 
     if (!isPresent && !endDate) {
       alert("Укажите дату окончания или отметьте 'По настоящее время'");
-      return;
+      return false;
     }
 
     const experienceData = {
@@ -41,24 +72,21 @@ export default function StepExperience() {
       descriptionRaw: rawDescription.trim(),
     };
 
-    // Use generated description if available, otherwise use raw
     experienceData.description = generatedDescription || rawDescription.trim();
 
     if (editingId) {
       updateExperience(editingId, experienceData);
-      setEditingId(null);
     } else {
       addExperience(experienceData);
     }
 
-    // Reset form
-    setCompany("");
-    setPosition("");
-    setStartDate("");
-    setEndDate("");
-    setIsPresent(false);
-    setRawDescription("");
-    setGeneratedDescription("");
+    resetForm();
+    return true;
+  };
+
+  const handleAddExperience = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    persistExperience();
   };
 
   const handleEdit = (exp: Experience) => {
@@ -70,6 +98,13 @@ export default function StepExperience() {
     setIsPresent(exp.period.end === null);
     setRawDescription(exp.descriptionRaw || "");
     setGeneratedDescription(exp.description || "");
+  };
+
+  const handleNextStep = () => {
+    if (!persistExperience()) {
+      return;
+    }
+    nextStep();
   };
 
   const handleDelete = (id: string) => {
@@ -281,7 +316,7 @@ export default function StepExperience() {
           </button>
           <button
             type="button"
-            onClick={nextStep}
+            onClick={handleNextStep}
             className="primary-button flex-1"
           >
             <p>Продолжить</p>

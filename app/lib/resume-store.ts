@@ -14,6 +14,11 @@ interface ResumeBuilderState {
   setTitle: (title: string) => void;
   setAbout: (about: string) => void;
   setAboutRaw: (aboutRaw: string) => void;
+  setPersonalInfo: (
+    info: Partial<
+      Pick<ResumeData, "fullName" | "location" | "email" | "phone" | "linkedin" | "telegram">
+    >
+  ) => void;
   addExperience: (experience: Omit<Experience, "id">) => void;
   updateExperience: (id: string, experience: Partial<Experience>) => void;
   removeExperience: (id: string) => void;
@@ -28,14 +33,21 @@ interface ResumeBuilderState {
   setGenerationError: (error: string | null) => void;
   reset: () => void;
   initializeResume: (id?: string) => void;
+  hydrateResume: (resume: ResumeData) => void;
 }
 
 const STORAGE_KEY = "resume-builder-state";
 
 const initialState: Partial<ResumeData> = {
+  fullName: "",
   title: "",
   about: "",
   aboutRaw: "",
+  location: "",
+  email: "",
+  phone: "",
+  linkedin: "",
+  telegram: "",
   experiences: [],
   skills: [],
   languages: [],
@@ -154,6 +166,19 @@ export const useResumeStore = create<ResumeBuilderState>((set, get) => ({
     set((state) => {
       const newState = {
         resumeData: { ...state.resumeData, aboutRaw },
+      };
+      saveToStorage({ ...get(), ...newState }, get);
+      return newState;
+    });
+  },
+
+  setPersonalInfo: (info) => {
+    set((state) => {
+      const newState = {
+        resumeData: {
+          ...state.resumeData,
+          ...info,
+        },
       };
       saveToStorage({ ...get(), ...newState }, get);
       return newState;
@@ -348,6 +373,34 @@ export const useResumeStore = create<ResumeBuilderState>((set, get) => ({
         updatedAt: now,
       },
     }));
+  },
+
+  hydrateResume: (resume: ResumeData) => {
+    const normalized: ResumeData = {
+      ...initialState,
+      ...resume,
+      fullName: resume.fullName || "",
+      location: resume.location || "",
+      email: resume.email || "",
+      phone: resume.phone || "",
+      linkedin: resume.linkedin || "",
+      telegram: resume.telegram || "",
+      experiences: resume.experiences || [],
+      skills: resume.skills || [],
+      languages: resume.languages || [],
+      recommendations: resume.recommendations || [],
+      style: resume.style || "modern",
+    };
+
+    const newState = {
+      currentStep: 1,
+      resumeData: normalized,
+      isGenerating: false,
+      generationError: null,
+    };
+
+    set(newState);
+    saveToStorage({ ...get(), ...newState }, get);
   },
 }));
 

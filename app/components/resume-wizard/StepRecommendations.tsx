@@ -45,9 +45,15 @@ export default function StepRecommendations() {
     // Prepare final resume data
     const finalResume: ResumeData = {
       id: resumeData.id || "",
+      fullName: resumeData.fullName || "",
       title: resumeData.title,
       about: resumeData.about || "",
       aboutRaw: resumeData.aboutRaw || "",
+      location: resumeData.location || "",
+      email: resumeData.email || "",
+      phone: resumeData.phone || "",
+      linkedin: resumeData.linkedin || "",
+      telegram: resumeData.telegram || "",
       experiences: resumeData.experiences || [],
       skills: resumeData.skills || [],
       languages: resumeData.languages || [],

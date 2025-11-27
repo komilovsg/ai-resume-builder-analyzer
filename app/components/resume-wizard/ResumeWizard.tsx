@@ -16,16 +16,23 @@ const steps = [
   { number: 6, title: "Рекомендации" },
 ];
 
-export default function ResumeWizard() {
-  const { currentStep, resumeData, initializeResume, reset } = useResumeStore();
+interface ResumeWizardProps {
+  autoInit?: boolean;
+  enableStepNavigation?: boolean;
+}
+
+export default function ResumeWizard({
+  autoInit = true,
+  enableStepNavigation = false,
+}: ResumeWizardProps) {
+  const { currentStep, resumeData, initializeResume, reset, setCurrentStep } = useResumeStore();
 
   useEffect(() => {
-    // Only initialize if resume doesn't have an ID yet
+    if (!autoInit) return;
     if (!resumeData?.id) {
       initializeResume();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [autoInit, resumeData?.id, initializeResume]);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -52,6 +59,11 @@ export default function ResumeWizard() {
     }
   };
 
+  const handleStepClick = (stepNumber: number) => {
+    if (!enableStepNavigation || stepNumber === currentStep) return;
+    setCurrentStep(stepNumber);
+  };
+
   return (
     <div className="wizard-container">
       {/* Reset Button */}
@@ -69,19 +81,22 @@ export default function ResumeWizard() {
       {/* Progress Bar */}
       <div className="wizard-progress">
         {steps.map((step) => (
-          <div
+          <button
             key={step.number}
+            type="button"
             className={`wizard-step-indicator ${
               step.number === currentStep
                 ? "active"
                 : step.number < currentStep
                 ? "completed"
                 : ""
-            }`}
+            } ${enableStepNavigation ? "cursor-pointer" : "cursor-default"}`}
+            onClick={() => handleStepClick(step.number)}
+            disabled={!enableStepNavigation}
           >
             <div className="wizard-step-number">{step.number}</div>
             <div className="wizard-step-title">{step.title}</div>
-          </div>
+          </button>
         ))}
       </div>
 

@@ -1,8 +1,13 @@
+import { buildContactSegments } from "../utils/contact";
+
 interface ResumeMinimalProps {
   resumeData: ResumeData;
+  variant?: "page" | "card";
 }
 
-export default function ResumeMinimal({ resumeData }: ResumeMinimalProps) {
+export default function ResumeMinimal({ resumeData, variant = "page" }: ResumeMinimalProps) {
+  const contactSegments = buildContactSegments(resumeData);
+  const isInteractive = variant === "page";
   const formatDate = (date: string | null) => {
     if (!date) return "По настоящее время";
     const [year, month] = date.split("-");
@@ -20,14 +25,37 @@ export default function ResumeMinimal({ resumeData }: ResumeMinimalProps) {
   };
 
   return (
-    <div className="resume-minimal">
+    <div className="resume-document resume-minimal">
       {/* Header */}
       <header className="mb-12">
-        <h1 className="text-3xl font-light text-gray-900 mb-3">
+        {resumeData.fullName && (
+          <h1 className="text-3xl font-semibold text-gray-900 tracking-wide mb-1">
+            {resumeData.fullName}
+          </h1>
+        )}
+        <p className="text-xl font-light text-gray-700 uppercase tracking-widest">
           {resumeData.title}
-        </h1>
+        </p>
+        {contactSegments.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-x-3 gap-y-2 text-xs text-gray-500 uppercase tracking-widest">
+            {contactSegments.map((segment, index) => (
+              <div key={`${segment.text}-${index}`} className="flex items-center gap-2">
+                {index > 0 && <span className="text-gray-400">•</span>}
+                {isInteractive && segment.href ? (
+                  <a href={segment.href} className="hover:text-gray-900 transition-colors normal-case break-all">
+                    {segment.isBracketed ? `[${segment.text}]` : segment.text}
+                  </a>
+                ) : (
+                  <span className="normal-case">
+                    {segment.isBracketed ? `[${segment.text}]` : segment.text}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         {resumeData.about && (
-          <p className="text-gray-600 text-sm leading-relaxed max-w-2xl">
+          <p className="mt-4 text-gray-600 text-sm leading-relaxed max-w-2xl">
             {resumeData.about}
           </p>
         )}

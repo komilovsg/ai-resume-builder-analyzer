@@ -8,9 +8,10 @@ import "toastify-js/src/toastify.css";
 
 interface ResumePreviewProps {
   resumeData: ResumeData;
+  onContentRef?: (node: HTMLDivElement | null) => void;
 }
 
-export default function ResumePreview({ resumeData }: ResumePreviewProps) {
+export default function ResumePreview({ resumeData, onContentRef }: ResumePreviewProps) {
   const { setStyle } = useResumeStore();
   const [selectedStyle, setSelectedStyle] = useState<ResumeStyle>(
     resumeData.style || "modern"
@@ -197,10 +198,17 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
     }
   };
 
+  const assignResumeRef = (node: HTMLDivElement | null) => {
+    resumeRef.current = node;
+    if (onContentRef) {
+      onContentRef(node);
+    }
+  };
+
   return (
-    <div className="w-full max-w-6xl px-4">
+    <div className="w-full max-w-6xl px-4 resume-preview-container">
       {/* Style Selector */}
-      <div className="mb-8 flex justify-center gap-4">
+      <div className="mb-8 flex justify-center gap-4 resume-style-switcher">
         <button
           onClick={() => handleStyleChange("modern")}
           className={`px-6 py-2 rounded-full font-semibold transition-colors ${
@@ -234,12 +242,15 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
       </div>
 
       {/* Resume Preview */}
-      <div ref={resumeRef} className="bg-white shadow-lg rounded-lg p-8 mb-8">
+      <div
+        ref={assignResumeRef}
+        className="bg-white shadow-lg rounded-lg p-8 mb-8 resume-content-card"
+      >
         {renderResume()}
       </div>
 
       {/* Actions */}
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-4 resume-actions">
         <button
           onClick={handleExportPDF}
           disabled={isExporting}

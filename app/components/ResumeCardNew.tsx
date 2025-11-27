@@ -1,53 +1,111 @@
-import { Link } from "react-router";
+import type { MouseEvent } from "react";
+import { Link, useNavigate } from "react-router";
+import ResumeModern from "./resume-preview/styles/ResumeModern";
+import ResumeClassic from "./resume-preview/styles/ResumeClassic";
+import ResumeMinimal from "./resume-preview/styles/ResumeMinimal";
 
 interface ResumeCardNewProps {
-  resume: ResumeData;
+  resume: ResumeData & { storageKey: string };
+  onDelete: (storageKey: string) => void;
+  isDeleting: boolean;
 }
 
-export default function ResumeCardNew({ resume }: ResumeCardNewProps) {
+export default function ResumeCardNew({
+  resume,
+  onDelete,
+  isDeleting,
+}: ResumeCardNewProps) {
+  const navigate = useNavigate();
+  const styleLabels: Record<ResumeStyle, string> = {
+    modern: "Современный",
+    classic: "Классический",
+    minimal: "Минималистичный",
+  };
+
+  const normalizedResume: ResumeData = {
+    ...resume,
+    fullName: resume.fullName || resume.title,
+    location: resume.location || "",
+    about: resume.about || "",
+    aboutRaw: resume.aboutRaw || "",
+    email: resume.email || "",
+    phone: resume.phone || "",
+    linkedin: resume.linkedin || "",
+    telegram: resume.telegram || "",
+    experiences: resume.experiences || [],
+    skills: resume.skills || [],
+    languages: resume.languages || [],
+    recommendations: resume.recommendations || [],
+    style: resume.style || "modern",
+    createdAt: resume.createdAt || new Date().toISOString(),
+    updatedAt: resume.updatedAt || new Date().toISOString(),
+  };
+
+  const renderPreviewByStyle = () => {
+    switch (normalizedResume.style) {
+      case "classic":
+        return <ResumeClassic resumeData={normalizedResume} variant="card" />;
+      case "minimal":
+        return <ResumeMinimal resumeData={normalizedResume} variant="card" />;
+      case "modern":
+      default:
+        return <ResumeModern resumeData={normalizedResume} variant="card" />;
+    }
+  };
+
+  const handleDeleteClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onDelete(resume.storageKey);
+  };
+
+  const handleEditClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    navigate(`/create?resumeId=${resume.id}`);
+  };
+
   return (
-    <Link
-      to={`/resume/${resume.id}/preview`}
-      className="resume-card animate-in fade-in duration-700"
-    >
-      <div className="resume-card-header">
-        <div className="flex flex-col gap-2">
-          <h2 className="!text-base font-bold break-words">{resume.title}</h2>
-          {resume.about && (
-            <p className="text-sm text-gray-500 line-clamp-2">
-              {resume.about.substring(0, 100)}...
-            </p>
+    <div className="relative group">
+      <div className="absolute -top-3 -right-3 z-10 flex gap-2 opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto">
+        <button
+          type="button"
+          onClick={handleEditClick}
+          title="Редактировать резюме"
+          className="rounded-full bg-white/90 border border-blue-200 text-blue-600 shadow-lg p-2 hover:bg-blue-50 transition"
+        >
+          <span aria-hidden="true">✎</span>
+        </button>
+        <button
+          type="button"
+          onClick={handleDeleteClick}
+          disabled={isDeleting}
+          title="Удалить резюме"
+          className="rounded-full bg-white/90 border border-red-200 text-red-600 shadow-lg p-2 hover:bg-red-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isDeleting ? (
+            <span className="block w-4 h-4 border-2 border-red-200 border-t-red-500 rounded-full animate-spin" />
+          ) : (
+            <span aria-hidden="true">✕</span>
           )}
-        </div>
-        <div className="flex-shrink-0">
-          <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-            <span className="text-2xl">📄</span>
-          </div>
-        </div>
+        </button>
       </div>
-      <div className="gradient-border p-4">
-        <div className="space-y-2 text-sm">
-          {resume.experiences && resume.experiences.length > 0 && (
-            <div>
-              <span className="font-semibold">Опыт: </span>
-              <span>{resume.experiences.length} {resume.experiences.length === 1 ? "место" : "мест"}</span>
-            </div>
-          )}
-          {resume.skills && resume.skills.length > 0 && (
-            <div>
-              <span className="font-semibold">Навыки: </span>
-              <span>{resume.skills.length}</span>
-            </div>
-          )}
-          {resume.languages && resume.languages.length > 0 && (
-            <div>
-              <span className="font-semibold">Языки: </span>
-              <span>{resume.languages.length}</span>
-            </div>
-          )}
+      <Link
+        to={`/resume/${resume.id}/preview`}
+        className={`resume-card resume-card--preview animate-in fade-in duration-700 ${
+          isDeleting ? "pointer-events-none opacity-60" : ""
+        }`}
+      >
+        <div className="resume-card-preview-shell">
+          <div className="resume-card-preview-scale">{renderPreviewByStyle()}</div>
         </div>
-      </div>
-    </Link>
+        <div className="resume-card-caption">
+          <p className="text-xs uppercase tracking-widest text-gray-500">
+            Стиль: {styleLabels[normalizedResume.style]}
+          </p>
+        </div>
+      </Link>
+    </div>
   );
 }
 

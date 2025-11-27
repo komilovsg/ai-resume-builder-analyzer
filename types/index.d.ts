@@ -60,9 +60,15 @@ interface Job {
   // Types for Resume Builder
   interface ResumeData {
     id: string;
+    fullName: string;
     title: string; // "Frontend Developer", "Designer", etc.
     about: string; // AI-generated professional about text
     aboutRaw?: string; // User's raw input before AI generation
+    location?: string;
+    email?: string;
+    phone?: string;
+    linkedin?: string;
+    telegram?: string;
     experiences: Experience[];
     skills: string[];
     languages: Language[];

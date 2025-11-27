@@ -88,12 +88,70 @@ form {
   .page-heading {
     @apply flex flex-col items-center gap-8 max-w-4xl text-center max-sm:gap-4;
   }
+
+  .page-heading--compact {
+    @apply gap-6 max-w-3xl;
+  }
+
+  .home-cta {
+    @apply w-full flex flex-col gap-4 rounded-3xl border border-white/60 bg-white/70 p-5 shadow-lg backdrop-blur;
+  }
+
+  .home-cta__actions {
+    @apply flex flex-col sm:flex-row gap-4 justify-center;
+  }
+
+  .home-cta__btn {
+    @apply w-full sm:w-auto px-8 flex items-center justify-center gap-2 text-base font-semibold;
+  }
+
+  .home-cta__icon {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/30 text-current;
+  }
   .resumes-section {
     @apply flex flex-wrap max-md:flex-col max-md:gap-4 gap-6 items-start max-md:items-center w-full max-w-[1850px] justify-evenly;
   }
 
   .resume-card {
     @apply flex flex-col gap-8 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] bg-white rounded-2xl p-4;
+  }
+
+  .resume-card--preview {
+    @apply bg-transparent p-0 w-[300px] lg:w-[360px] xl:w-[400px] gap-4 min-h-[500px];
+  }
+
+  .resume-card-preview-shell {
+    @apply w-full rounded-[26px] border border-gray-100 bg-white shadow-xl overflow-hidden flex items-start justify-center;
+    min-height: 420px;
+    position: relative;
+  }
+
+  .resume-card-preview-shell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 -80px 80px rgba(255, 255, 255, 0.9);
+  }
+
+  .resume-card-preview-scale {
+    transform: scale(0.45);
+    transform-origin: top center;
+    width: 560px;
+    padding: 1.25rem 0 0;
+    pointer-events: none;
+  }
+
+  .resume-card-caption {
+    @apply text-center mt-3;
+  }
+
+  .resume-document {
+    width: 100%;
+  }
+
+  .resume-card-preview-scale .resume-document {
+    width: 560px;
   }
 
   .resume-card-header {
@@ -200,6 +258,12 @@ form {
   }
 }
 
+@media (min-width: 1024px) {
+  .resume-card-preview-scale {
+    transform: scale(0.48);
+  }
+}
+
 @utility bg-gradient {
   /* Используем RGB вместо oklch */
   background: linear-gradient(to bottom, rgb(240, 244, 255) 60%, rgba(250, 113, 133, 0.8));
@@ -227,6 +291,57 @@ form {
 @utility inset-shadow {
   box-shadow: inset 0 0 12px 0 rgba(36, 99, 235, 0.2);
   backdrop-filter: blur(10px);
+}
+
+@media (min-width: 1280px) {
+  .resume-preview-page {
+    min-height: 100vh;
+    padding-top: 1.5rem !important;
+  }
+
+  .resume-preview-page .resume-nav {
+    padding: 0.75rem 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .resume-preview-container {
+    transform: scale(0.88);
+    transform-origin: top center;
+    max-width: 1100px;
+  }
+
+  .resume-preview-container .resume-style-switcher button {
+    padding: 0.35rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .resume-preview-container .resume-content-card {
+    padding: 1.5rem;
+  }
+
+  .resume-preview-container .resume-actions button {
+    max-width: 220px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .resume-preview-container .resume-modern h1,
+  .resume-preview-container .resume-classic h1,
+  .resume-preview-container .resume-minimal h1 {
+    font-size: 2.5rem;
+  }
+
+  .resume-preview-container .resume-modern h2,
+  .resume-preview-container .resume-classic h2,
+  .resume-preview-container .resume-minimal h2 {
+    font-size: 1.5rem;
+  }
+
+  .resume-preview-container .resume-modern section,
+  .resume-preview-container .resume-classic section,
+  .resume-preview-container .resume-minimal section {
+    margin-bottom: 1.5rem;
+  }
 }
 
 @keyframes fadeIn {
