@@ -1,0 +1,127 @@
+interface ResumeModernProps {
+  resumeData: ResumeData;
+}
+
+export default function ResumeModern({ resumeData }: ResumeModernProps) {
+  const formatDate = (date: string | null) => {
+    if (!date) return "По настоящее время";
+    const [year, month] = date.split("-");
+    return `${month}/${year}`;
+  };
+
+  const getLanguageLabel = (level: LanguageLevel) => {
+    const labels: Record<LanguageLevel, string> = {
+      native: "Родной",
+      fluent: "Свободно",
+      intermediate: "Средний",
+      basic: "Базовый",
+    };
+    return labels[level];
+  };
+
+  return (
+    <div className="resume-modern">
+      {/* Header */}
+      <header className="mb-8 pb-6 border-b-2 border-gray-300">
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          {resumeData.title}
+        </h1>
+        {resumeData.about && (
+          <p className="text-gray-600 text-lg leading-relaxed">
+            {resumeData.about}
+          </p>
+        )}
+      </header>
+
+      {/* Experience */}
+      {resumeData.experiences && resumeData.experiences.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+            Опыт работы
+          </h2>
+          <div className="space-y-6">
+            {resumeData.experiences.map((exp) => (
+              <div key={exp.id} className="pl-4 border-l-4 border-blue-500">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      {exp.position}
+                    </h3>
+                    <p className="text-lg text-gray-600">{exp.company}</p>
+                  </div>
+                  <span className="text-gray-500 text-sm whitespace-nowrap">
+                    {formatDate(exp.period.start)} -{" "}
+                    {formatDate(exp.period.end)}
+                  </span>
+                </div>
+                {exp.description && (
+                  <div className="text-gray-700 whitespace-pre-line mt-2">
+                    {exp.description}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Skills */}
+      {resumeData.skills && resumeData.skills.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+            Навыки
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {resumeData.skills.map((skill, index) => (
+              <span
+                key={index}
+                className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Languages */}
+      {resumeData.languages && resumeData.languages.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+            Языки
+          </h2>
+          <div className="space-y-2">
+            {resumeData.languages.map((lang) => (
+              <div key={lang.id} className="flex justify-between">
+                <span className="font-medium">{lang.name}</span>
+                <span className="text-gray-600">
+                  {getLanguageLabel(lang.level)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Recommendations */}
+      {resumeData.recommendations &&
+        resumeData.recommendations.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+              Рекомендации
+            </h2>
+            <div className="space-y-4">
+              {resumeData.recommendations.map((rec) => (
+                <div key={rec.id} className="pl-4 border-l-4 border-green-500">
+                  <p className="font-semibold text-gray-900">{rec.name}</p>
+                  <p className="text-gray-600">{rec.position}</p>
+                  <p className="text-sm text-gray-500">{rec.contact}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+    </div>
+  );
+}
+

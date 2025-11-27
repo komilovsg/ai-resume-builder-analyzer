@@ -54,9 +54,11 @@ export default function Upload() {
 
         if(!feedback) return setStatusText("Error: Failed to analyze resume");
 
-        const feedbackText = feedback.message.content === 'string' 
+        const feedbackText = typeof feedback.message.content === 'string' 
             ? feedback.message.content 
-            : feedback.message.content[0].text;
+            : Array.isArray(feedback.message.content) && feedback.message.content[0] && typeof feedback.message.content[0] === 'object' && 'text' in feedback.message.content[0]
+            ? feedback.message.content[0].text
+            : String(feedback.message.content);
 
 
         data.feedback = JSON.parse(feedbackText);

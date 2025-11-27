@@ -1,3 +1,5 @@
+/* stylelint-disable */
+/* Tailwind CSS directives - @apply, @layer, @theme are valid Tailwind directives */
 @import url("https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -5,9 +7,11 @@
 @theme {
   --font-sans: "Mona Sans", ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  
+  /* Все цвета заданы в HEX/RGB формате для совместимости с html2canvas */
   --color-dark-200: #475467;
-  --color-light-blue-100: #c1d3f81a;
-  --color-light-blue-200: #a7bff14d;
+  --color-light-blue-100: rgba(193, 211, 248, 0.1);
+  --color-light-blue-200: rgba(167, 191, 241, 0.3);
 
   --color-badge-green: #d5faf1;
   --color-badge-red: #f9e3e2;
@@ -16,6 +20,10 @@
   --color-badge-green-text: #254d4a;
   --color-badge-red-text: #752522;
   --color-badge-yellow-text: #73321b;
+  
+  /* Primary gradient цвета в RGB */
+  --color-primary-start: rgb(142, 152, 255);
+  --color-primary-end: rgb(96, 107, 235);
 }
 
 html,
@@ -114,10 +122,87 @@ form {
   .uploader-selected-file {
     @apply flex items-center justify-between p-3 bg-gray-50 rounded-2xl;
   }
+
+  .wizard-container {
+    @apply w-full max-w-6xl mx-auto px-4 py-8;
+  }
+
+  .wizard-progress {
+    @apply flex flex-wrap justify-center gap-4 mb-8 pb-8 border-b border-gray-200;
+  }
+
+  .wizard-step-indicator {
+    @apply flex flex-col items-center gap-2 min-w-[120px];
+  }
+
+  .wizard-step-number {
+    @apply w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white bg-gray-300 transition-colors;
+  }
+
+  .wizard-step-indicator.active .wizard-step-number {
+    @apply primary-gradient;
+  }
+
+  .wizard-step-indicator.completed .wizard-step-number {
+    @apply bg-green-500;
+  }
+
+  .wizard-step-title {
+    @apply text-sm text-center text-gray-600;
+  }
+
+  .wizard-step-indicator.active .wizard-step-title {
+    @apply text-gray-900 font-semibold;
+  }
+
+  .wizard-content {
+    @apply flex flex-col items-center;
+  }
+
+  .wizard-step {
+    @apply w-full max-w-4xl flex flex-col items-center gap-6;
+  }
+
+  .secondary-button {
+    @apply border-2 border-gray-300 text-gray-700 rounded-full px-4 py-2 cursor-pointer w-full hover:bg-gray-50;
+  }
+
+  /* Radio button styling */
+  input[type="radio"] {
+    @apply w-5 h-5 cursor-pointer accent-blue-600;
+    appearance: none;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    background: white;
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  input[type="radio"]:checked {
+    @apply border-blue-600;
+    background: white;
+  }
+
+  input[type="radio"]:checked::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2563eb;
+  }
+
+  input[type="radio"]:hover {
+    @apply border-blue-400;
+  }
 }
 
 @utility bg-gradient {
-  background: linear-gradient(to bottom, #f0f4ff 60%, #fa7185cc);
+  /* Используем RGB вместо oklch */
+  background: linear-gradient(to bottom, rgb(240, 244, 255) 60%, rgba(250, 113, 133, 0.8));
 }
 
 @utility text-gradient {
@@ -129,12 +214,14 @@ form {
 }
 
 @utility primary-gradient {
-  background: linear-gradient(to bottom, #8e98ff, #606beb);
-  box-shadow: 0px 74px 21px 0px #6678ef00;
+  /* Используем RGB вместо oklch для совместимости с html2canvas */
+  background: linear-gradient(to bottom, rgb(142, 152, 255), rgb(96, 107, 235));
+  box-shadow: 0px 74px 21px 0px rgba(102, 120, 239, 0);
 }
 
 @utility primary-gradient-hover {
-  background: linear-gradient(to bottom, #717dff, #4957eb);
+  /* Используем RGB вместо oklch */
+  background: linear-gradient(to bottom, rgb(113, 125, 255), rgb(73, 87, 235));
 }
 
 @utility inset-shadow {

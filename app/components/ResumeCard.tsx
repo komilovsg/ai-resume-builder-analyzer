@@ -41,7 +41,13 @@ const ResumeCard = ({
           )}
         </div>
         <div className="flex-shrink-0">
-          <ScoreCircle score={feedback.overallScore} />
+          {feedback && feedback.overallScore !== undefined ? (
+            <ScoreCircle score={feedback.overallScore} />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-sm text-gray-500">N/A</span>
+            </div>
+          )}
         </div>
       </div>
       {resumeUrl && (
