@@ -2,8 +2,9 @@
 
 > Интеллектуальный инструмент для загрузки резюме, конвертации в изображение и получения детального AI‑отзыва с оценками ATS и персональными советами по улучшению.
 
-**Онлайн-версия:** [https://puter.com/app/jsm-ai-resume-analyzing-level-up](https://puter.com/app/jsm-ai-resume-analyzing-level-up)
-**Онлайн-версия:** [https://ai-resume-builder-analyzer-n029rwk31-komilovsg-projects.vercel.app/](https://ai-resume-builder-analyzer-n029rwk31-komilovsg-projects.vercel.app/)
+**Онлайн-версии:**
+- **Puter:** [https://puter.com/app/jsm-ai-resume-analyzing-level-up](https://puter.com/app/jsm-ai-resume-analyzing-level-up)
+- **Vercel:** [https://ai-resume-builder-analyzer-n029rwk31-komilovsg-projects.vercel.app/](https://ai-resume-builder-analyzer-n029rwk31-komilovsg-projects.vercel.app/)
 
 ---
 
