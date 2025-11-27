@@ -1,11 +1,17 @@
+import { getLanguageInstruction } from "~/lib/language";
+import type { SupportedLanguage } from "~/lib/language";
+
 /**
  * AI Prompts for Resume Generation
  */
 
 export const generateAboutPrompt = (
   rawText: string,
-  profession: string
+  profession: string,
+  language: SupportedLanguage
 ): string => {
+  const languageInstruction = getLanguageInstruction(language);
+
   return `You are an expert resume writer. Your task is to create a professional "About" or "Summary" section for a resume.
 
 The user's profession/target position is: ${profession}
@@ -21,6 +27,8 @@ Based on this information, create a professional, concise, and compelling "About
 - Focus on achievements and value proposition
 - Be written in a confident, professional tone
 
+${languageInstruction}
+
 Return ONLY the generated text, without any additional comments, explanations, or markdown formatting.`;
 };
 
@@ -28,8 +36,13 @@ export const generateExperienceDescriptionPrompt = (
   rawDescription: string,
   company: string,
   position: string,
-  profession: string
+  profession: string,
+  language: SupportedLanguage
 ): string => {
+  const languageInstruction = language === "ru"
+    ? "Каждый пункт описания обязан быть написан на русском языке."
+    : "Each bullet point must be written in English.";
+
   return `You are an expert resume writer. Your task is to create a professional job description for a resume entry.
 
 The user's target profession is: ${profession}
@@ -47,13 +60,22 @@ Based on this information, create a professional job description with 3-5 bullet
 - Use professional language
 - Be ATS-friendly
 
+${languageInstruction}
+
 Format the response as a JSON array of strings, where each string is a bullet point. Example format:
 ["Achieved X by doing Y", "Led team of Z to accomplish W", "Improved metrics by X%"]
 
 Return ONLY the JSON array, without any additional text, comments, or markdown formatting.`;
 };
 
-export const generateSkillsPrompt = (profession: string): string => {
+export const generateSkillsPrompt = (
+  profession: string,
+  language: SupportedLanguage
+): string => {
+  const languageInstruction = language === "ru"
+    ? "Названия всех навыков должны быть на русском языке."
+    : "List all skill names in English.";
+
   return `You are an expert career advisor. Your task is to suggest relevant skills for a resume.
 
 The target profession is: ${profession}
@@ -63,6 +85,8 @@ Based on this profession, suggest 10-15 relevant skills that would be important 
 - Soft skills that are valuable
 - Tools and technologies commonly used
 - Industry-specific competencies
+
+${languageInstruction}
 
 Return the skills as a JSON array of strings. Example format:
 ["Skill 1", "Skill 2", "Skill 3"]

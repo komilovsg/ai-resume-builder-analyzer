@@ -1,0 +1,19 @@
+{
+  "home": {
+    "title": "My Resumes",
+    "noResumes": "No resumes found. Create or upload your first resume",
+    "hasResumes": "View saved templates and run assessment with one click",
+    "description": "Create a new resume from scratch or upload a ready PDF to get ATS assessment and tips",
+    "createResume": "Create Resume",
+    "uploadResume": "Upload and Assess Resume",
+    "analyzedResumes": "Analyzed Resumes",
+    "createdResumes": "Created Resumes",
+    "deleteConfirm": "Delete this resume? It cannot be restored.",
+    "deleteSuccess": "Resume deleted",
+    "deleteError": "Failed to delete resume. Please try again later"
+  },
+  "common": {
+    "logOut": "Log Out"
+  }
+}
+

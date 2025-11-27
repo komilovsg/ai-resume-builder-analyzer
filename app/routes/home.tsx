@@ -5,6 +5,7 @@ import ResumeCardNew from "~/components/ResumeCardNew";
 import { Link, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { usePuterStore } from "~/lib/puter";
+import { useTranslation } from "react-i18next";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 
@@ -30,6 +31,7 @@ const isNewResume = (resume: any): resume is ResumeData => {
 export default function Home() {
   const { auth, kv } = usePuterStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [oldResumes, setOldResumes] = useState<StoredOldResume[]>([]);
   const [newResumes, setNewResumes] = useState<StoredNewResume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
@@ -94,7 +96,7 @@ export default function Home() {
   };
 
   const handleDeleteResume = async (storageKey: string) => {
-    if (!confirm("Удалить это резюме? Его нельзя будет восстановить.")) {
+    if (!confirm(t('home.deleteConfirm'))) {
       return;
     }
 
@@ -112,10 +114,10 @@ export default function Home() {
         prev.filter((resume) => resume.storageKey !== storageKey)
       );
 
-      showToast("Резюме удалено", "success");
+      showToast(t('home.deleteSuccess'), "success");
     } catch (error) {
       console.error("Error deleting resume:", error);
-      showToast("Не удалось удалить резюме. Попробуйте позже", "error");
+      showToast(t('home.deleteError'), "error");
     } finally {
       setDeletingKey(null);
     }
@@ -126,20 +128,20 @@ export default function Home() {
       <Navbar />
       <section className="main-section">
         <div className="page-heading page-heading--compact py-12">
-          <h1 className="text-[2.75rem] leading-tight">Мои резюме</h1>
+          <h1 className="text-[2.75rem] leading-tight">{t('home.title')}</h1>
           {!loadingResumes && oldResumes.length === 0 && newResumes.length === 0 ? (
             <h2 className="text-2xl text-dark-200">
-              Резюме не найдено. Создайте или загрузите первое резюме
+              {t('home.noResumes')}
             </h2>
           ) : (
             <h2 className="text-2xl text-dark-200">
-              Просмотрите сохранённые шаблоны и запускайте оценку в один клик
+              {t('home.hasResumes')}
             </h2>
           )}
           <div className="home-cta mt-8">
             <div className="home-cta__text">
               <p className="text-sm text-gray-600">
-                Создайте новое резюме с нуля или загрузите готовый PDF, чтобы получить ATS-оценку и советы
+                {t('home.description')}
               </p>
             </div>
             <div className="home-cta__actions">
@@ -155,7 +157,7 @@ export default function Home() {
                     />
                   </svg>
                 </span>
-                <p>Создать резюме</p>
+                <p>{t('home.createResume')}</p>
               </Link>
               <Link to="/upload" className="secondary-button home-cta__btn">
                 <span className="home-cta__icon" aria-hidden="true">
@@ -176,7 +178,7 @@ export default function Home() {
                     />
                   </svg>
                 </span>
-                <p>Загрузить и оценить резюме</p>
+                <p>{t('home.uploadResume')}</p>
               </Link>
             </div>
           </div>
@@ -195,7 +197,7 @@ export default function Home() {
           <>
             {oldResumes.length > 0 && (
               <div className="w-full max-w-6xl">
-                <h2 className="text-2xl font-bold mb-4">Проанализированные резюме</h2>
+                <h2 className="text-2xl font-bold mb-4">{t('home.analyzedResumes')}</h2>
                 <div className="resumes-section">
                   {oldResumes.map((resume) => (
                     <ResumeCard
@@ -211,7 +213,7 @@ export default function Home() {
 
             {newResumes.length > 0 && (
               <div className="w-full max-w-6xl mt-8">
-                <h2 className="text-2xl font-bold mb-4">Созданные резюме</h2>
+                <h2 className="text-2xl font-bold mb-4">{t('home.createdResumes')}</h2>
                 <div className="resumes-section">
                   {newResumes.map((resume) => (
                     <ResumeCardNew

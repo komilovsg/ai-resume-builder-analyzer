@@ -79,8 +79,84 @@ form {
   .back-button {
     @apply flex flex-row items-center gap-2 border border-gray-200 rounded-lg p-2 shadow-sm;
   }
+  .auth-card {
+    @apply bg-gradient-to-b from-light-blue-100 to-light-blue-200 p-4 rounded-2xl shadow-2xl backdrop-blur-sm;
+    animation: fadeIn 0.6s ease-out;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .auth-content {
+    @apply flex flex-col gap-10 rounded-2xl p-10 max-sm:p-8 bg-white/50;
+  }
+
+  .auth-header {
+    @apply flex flex-col gap-4 items-center text-center;
+  }
+
+  .auth-icon-wrapper {
+    @apply w-20 h-20 rounded-full primary-gradient flex items-center justify-center mb-2;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .auth-icon {
+    @apply w-10 h-10 text-white;
+  }
+
+  .auth-title {
+    @apply text-5xl max-sm:text-4xl font-bold text-gradient mb-2;
+    letter-spacing: -0.02em;
+  }
+
+  .auth-subtitle {
+    @apply text-2xl max-sm:text-xl text-dark-200 font-medium;
+  }
+
+  .auth-description {
+    @apply text-base text-gray-500 max-w-sm;
+    line-height: 1.6;
+  }
+
+  .auth-actions {
+    @apply flex flex-col gap-4 w-full;
+  }
+
   .auth-button {
-    @apply primary-gradient rounded-full py-4 px-8 cursor-pointer w-[600px] max-md:w-full text-3xl font-semibold text-white;
+    @apply rounded-full py-4 px-8 cursor-pointer w-full text-xl font-semibold text-white;
+    @apply flex items-center justify-center gap-3 transition-all duration-300;
+    @apply hover:scale-105 active:scale-100 shadow-lg;
+    min-height: 64px;
+  }
+
+  .auth-button--primary {
+    @apply primary-gradient;
+  }
+
+  .auth-button--primary:hover {
+    @apply primary-gradient-hover shadow-xl;
+  }
+
+  .auth-button--secondary {
+    @apply bg-gray-600 hover:bg-gray-700;
+  }
+
+  .auth-button--loading {
+    @apply opacity-75 cursor-not-allowed;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .auth-button-icon {
+    @apply w-5 h-5;
+    transition: transform 0.3s ease;
+  }
+
+  .auth-button--primary:hover .auth-button-icon {
+    transform: translateX(4px);
+  }
+
+  .auth-button-spinner {
+    @apply w-5 h-5 border-2 border-white border-t-transparent rounded-full;
+    animation: spin 1s linear infinite;
   }
   .main-section {
     @apply flex flex-col items-center gap-8 pt-12 max-sm:mx-2 mx-15 pb-5;
@@ -164,6 +240,51 @@ form {
 
   .navbar {
     @apply flex flex-row justify-between items-center bg-white rounded-full p-4 w-full px-10 max-w-[1200px] mx-auto;
+  }
+
+  .navbar-actions {
+    @apply flex flex-row items-center gap-4;
+  }
+
+  .language-switcher {
+    @apply flex flex-row items-center gap-1 bg-gray-100 rounded-full p-1;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .language-switcher--changing {
+    pointer-events: none;
+  }
+
+  .language-switcher--changing .language-switcher__button {
+    opacity: 0.7;
+  }
+
+  .language-switcher__button {
+    @apply px-4 py-2 rounded-full text-sm font-medium;
+    @apply text-gray-600 hover:text-gray-900;
+    @apply min-w-[44px] text-center relative z-10;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(1);
+  }
+
+  .language-switcher__button.active {
+    @apply primary-gradient text-white shadow-md;
+    transform: scale(1.05);
+    animation: languageSwitchActive 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .language-switcher__button:not(.active) {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .language-switcher__button:not(.active):hover {
+    @apply bg-gray-200;
+    transform: scale(1.02);
+  }
+
+  .language-switcher__button:active {
+    transform: scale(0.98);
   }
 
   .score-badge {
@@ -347,8 +468,42 @@ form {
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(20px);
   }
   to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes languageSwitchActive {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1.05);
     opacity: 1;
   }
 }

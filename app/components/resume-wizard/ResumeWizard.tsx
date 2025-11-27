@@ -53,12 +53,6 @@ export default function ResumeWizard({
     }
   };
 
-  const handleReset = () => {
-    if (confirm("Вы уверены, что хотите сбросить все данные? Это действие нельзя отменить.")) {
-      reset();
-    }
-  };
-
   const handleStepClick = (stepNumber: number) => {
     if (!enableStepNavigation || stepNumber === currentStep) return;
     setCurrentStep(stepNumber);
@@ -66,18 +60,6 @@ export default function ResumeWizard({
 
   return (
     <div className="wizard-container">
-      {/* Reset Button */}
-      <div className="flex justify-end mb-4">
-        <button
-          type="button"
-          onClick={handleReset}
-          className="text-sm text-red-600 hover:text-red-800 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
-          title="Сбросить все данные"
-        >
-          🔄 Сбросить
-        </button>
-      </div>
-
       {/* Progress Bar */}
       <div className="wizard-progress">
         {steps.map((step) => (
