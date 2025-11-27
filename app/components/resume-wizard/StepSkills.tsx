@@ -2,10 +2,12 @@ import { useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useResumeStore } from "~/lib/resume-store";
 import { generateSuggestedSkills } from "~/lib/resume-ai";
+import { useTranslation } from "react-i18next";
 
 export default function StepSkills() {
   const { resumeData, addSkill, removeSkill, nextStep, prevStep, setGenerating, isGenerating } =
     useResumeStore();
+  const { t } = useTranslation();
   const [newSkill, setNewSkill] = useState("");
   const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -14,7 +16,7 @@ export default function StepSkills() {
 
   const handleLoadSuggestions = async () => {
     if (!resumeData.title) {
-      alert("Сначала укажите название резюме");
+      alert(t('wizard.skills.enterTitleFirst'));
       return;
     }
 
@@ -26,7 +28,7 @@ export default function StepSkills() {
       setSuggestedSkills(suggestions);
     } catch (error) {
       console.error("Error loading suggestions:", error);
-      alert("Не удалось загрузить предложения. Вы можете добавить навыки вручную.");
+      alert(t('wizard.skills.loadSuggestionsError'));
     } finally {
       setGenerating(false);
     }
@@ -71,11 +73,10 @@ export default function StepSkills() {
 
   return (
     <div className="wizard-step">
-      <h1 className="text-gradient">Навыки</h1>
-      <h2>Шаг 4: Добавьте навыки</h2>
+      <h1 className="text-gradient">{t('wizard.skills.title')}</h1>
+      <h2>{t('wizard.skills.subtitle')}</h2>
       <p className="text-dark-200 mb-6">
-        Добавьте навыки, которые у вас есть. Можно использовать AI-предложения
-        или добавить вручную.
+        {t('wizard.skills.description')}
       </p>
 
       <div className="w-full max-w-2xl space-y-6">
@@ -84,19 +85,19 @@ export default function StepSkills() {
             type="button"
             onClick={handleLoadSuggestions}
             disabled={isGenerating || !resumeData.title}
-            className="primary-button"
+            className="primary-button w-full"
           >
             <p>
               {isGenerating
-                ? "Загрузка предложений..."
-                : "Получить предложения от AI"}
+                ? t('wizard.skills.loadingSuggestions')
+                : t('wizard.skills.getSuggestions')}
             </p>
           </button>
         )}
 
         {showSuggestions && suggestedSkills.length > 0 && (
           <div className="gradient-border p-4">
-            <h3 className="font-semibold mb-3">Предложенные навыки:</h3>
+            <h3 className="font-semibold mb-3">{t('wizard.skills.suggestedSkills')}</h3>
             <div className="flex flex-wrap gap-2">
               {suggestedSkills.map((skill) => (
                 <button
@@ -120,9 +121,13 @@ export default function StepSkills() {
         {skills.length > 0 && (
           <div className="gradient-border p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-lg">Ваши навыки</h3>
+              <h3 className="font-semibold text-lg">{t('wizard.skills.yourSkills')}</h3>
               <span className="text-sm text-gray-500 bg-white px-3 py-1 rounded-full">
-                {skills.length} {skills.length === 1 ? "навык" : skills.length < 5 ? "навыка" : "навыков"}
+                {skills.length} {skills.length === 1 
+                  ? t('wizard.skills.skillCount.one')
+                  : skills.length < 5 
+                  ? t('wizard.skills.skillCount.few')
+                  : t('wizard.skills.skillCount.many')}
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -136,7 +141,7 @@ export default function StepSkills() {
                     type="button"
                     onClick={() => removeSkill(skill)}
                     className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full p-1 transition-colors"
-                    title="Удалить навык"
+                    title={t('wizard.skills.removeSkill')}
                   >
                     <img src="/icons/cross.svg" alt="remove" className="w-4 h-4" />
                   </button>
@@ -147,11 +152,11 @@ export default function StepSkills() {
         )}
 
         <div className="gradient-border p-6">
-          <h3 className="font-semibold mb-4 text-lg">Добавить навык вручную</h3>
+          <h3 className="font-semibold mb-4 text-lg">{t('wizard.skills.addManually')}</h3>
           <form onSubmit={handleAddSkill} className="space-y-3">
             <div className="form-div">
               <label htmlFor="new-skill" className="text-sm text-gray-600 mb-2">
-                Введите навык или несколько навыков через запятую
+                {t('wizard.skills.skillInputLabel')}
               </label>
               <div className="flex gap-1 justify-center items-center">
                 <div className="w-[70%]">
@@ -161,7 +166,7 @@ export default function StepSkills() {
                     value={newSkill}
                     onChange={(e) => setNewSkill(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Например: React, TypeScript, Figma или просто React"
+                    placeholder={t('wizard.skills.skillPlaceholder')}
                     className="w-full"
                     autoFocus
                   />
@@ -173,22 +178,22 @@ export default function StepSkills() {
                     !newSkill.trim() ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
-                  <p>Добавить</p>
+                  <p>{t('wizard.skills.addButton')}</p>
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                💡 Можно ввести несколько навыков через запятую или нажать Enter для добавления
+                {t('wizard.skills.skillHint')}
               </p>
             </div>
           </form>
         </div>
 
-        <div className="flex gap-4 mt-8">
-          <button type="button" onClick={prevStep} className="secondary-button">
-            <p>Назад</p>
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <button type="button" onClick={prevStep} className="secondary-button w-full sm:w-1/2">
+            <p>{t('wizard.skills.back')}</p>
           </button>
-          <button type="button" onClick={nextStep} className="primary-button flex-1">
-            <p>Продолжить</p>
+          <button type="button" onClick={nextStep} className="primary-button w-full sm:w-1/2">
+            <p>{t('wizard.skills.continue')}</p>
           </button>
         </div>
       </div>

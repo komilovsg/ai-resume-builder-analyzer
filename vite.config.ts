@@ -7,9 +7,9 @@ export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   ssr: {
     noExternal: [],
-    external: ["html2pdf.js"],
+    external: ["html2pdf.js", "pdfjs-dist"],
   },
   optimizeDeps: {
-    exclude: ["html2pdf.js"],
+    exclude: ["html2pdf.js", "pdfjs-dist"],
   },
 });

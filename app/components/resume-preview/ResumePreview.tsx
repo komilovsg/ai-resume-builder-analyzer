@@ -5,6 +5,7 @@ import ResumeClassic from "./styles/ResumeClassic";
 import ResumeMinimal from "./styles/ResumeMinimal";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import { useTranslation } from "react-i18next";
 
 interface ResumePreviewProps {
   resumeData: ResumeData;
@@ -13,6 +14,7 @@ interface ResumePreviewProps {
 
 export default function ResumePreview({ resumeData, onContentRef }: ResumePreviewProps) {
   const { setStyle } = useResumeStore();
+  const { t } = useTranslation();
   const [selectedStyle, setSelectedStyle] = useState<ResumeStyle>(
     resumeData.style || "modern"
   );
@@ -208,7 +210,7 @@ export default function ResumePreview({ resumeData, onContentRef }: ResumePrevie
   return (
     <div className="w-full max-w-6xl px-4 resume-preview-container">
       {/* Style Selector */}
-      <div className="mb-8 flex justify-center gap-4 resume-style-switcher">
+      <div className="mb-8 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 resume-style-switcher">
         <button
           onClick={() => handleStyleChange("modern")}
           className={`px-6 py-2 rounded-full font-semibold transition-colors ${
@@ -217,7 +219,7 @@ export default function ResumePreview({ resumeData, onContentRef }: ResumePrevie
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
-          Современный
+          {t('preview.styles.modern')}
         </button>
         <button
           onClick={() => handleStyleChange("classic")}
@@ -227,7 +229,7 @@ export default function ResumePreview({ resumeData, onContentRef }: ResumePrevie
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
-          Классический
+          {t('preview.styles.classic')}
         </button>
         <button
           onClick={() => handleStyleChange("minimal")}
@@ -237,7 +239,7 @@ export default function ResumePreview({ resumeData, onContentRef }: ResumePrevie
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
-          Минималистичный
+          {t('preview.styles.minimal')}
         </button>
       </div>
 
@@ -256,7 +258,7 @@ export default function ResumePreview({ resumeData, onContentRef }: ResumePrevie
           disabled={isExporting}
           className="primary-button max-w-xs disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <p>{isExporting ? "Экспорт..." : "Экспортировать в PDF"}</p>
+          <p>{isExporting ? t('preview.exporting') : t('preview.exportPDF')}</p>
         </button>
       </div>
     </div>

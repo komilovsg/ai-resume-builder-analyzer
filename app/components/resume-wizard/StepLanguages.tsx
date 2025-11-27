@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useResumeStore } from "~/lib/resume-store";
+import { useTranslation } from "react-i18next";
 
 const commonLanguages = [
   "Русский",
@@ -23,22 +24,23 @@ const commonLanguages = [
   "Хинди",
 ];
 
-const languageLevels: { value: LanguageLevel; label: string }[] = [
-  { value: "native", label: "Родной" },
-  { value: "fluent", label: "Свободно" },
-  { value: "intermediate", label: "Средний" },
-  { value: "basic", label: "Базовый" },
-];
-
 export default function StepLanguages() {
   const { resumeData, addLanguage, removeLanguage, nextStep, prevStep } =
     useResumeStore();
+  const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [customLanguage, setCustomLanguage] = useState("");
   const [level, setLevel] = useState<LanguageLevel>("fluent");
   const [useCustom, setUseCustom] = useState(false);
 
   const languages = resumeData.languages || [];
+
+  const languageLevels: { value: LanguageLevel; label: string }[] = [
+    { value: "native", label: t('wizard.languages.levels.native') },
+    { value: "fluent", label: t('wizard.languages.levels.fluent') },
+    { value: "intermediate", label: t('wizard.languages.levels.intermediate') },
+    { value: "basic", label: t('wizard.languages.levels.basic') },
+  ];
 
   const handleAddLanguage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,13 +50,13 @@ export default function StepLanguages() {
       : selectedLanguage.trim();
 
     if (!languageName) {
-      alert("Выберите или введите язык");
+      alert(t('wizard.languages.selectOrEnterError'));
       return;
     }
 
     // Check if already added
     if (languages.some((lang) => lang.name === languageName)) {
-      alert("Этот язык уже добавлен");
+      alert(t('wizard.languages.alreadyAdded'));
       return;
     }
 
@@ -72,17 +74,17 @@ export default function StepLanguages() {
 
   return (
     <div className="wizard-step">
-      <h1 className="text-gradient">Языки</h1>
-      <h2>Шаг 5: Добавьте языки</h2>
+      <h1 className="text-gradient">{t('wizard.languages.title')}</h1>
+      <h2>{t('wizard.languages.subtitle')}</h2>
       <p className="text-dark-200 mb-6">
-        Укажите языки, которыми вы владеете, и уровень владения.
+        {t('wizard.languages.description')}
       </p>
 
       <div className="w-full max-w-2xl space-y-6">
         {/* Current Languages */}
         {languages.length > 0 && (
           <div>
-            <h3 className="font-semibold mb-3">Ваши языки:</h3>
+            <h3 className="font-semibold mb-3">{t('wizard.languages.yourLanguages')}</h3>
             <div className="space-y-2">
               {languages.map((lang) => (
                 <div
@@ -111,8 +113,8 @@ export default function StepLanguages() {
         {/* Add Language Form */}
         <form onSubmit={handleAddLanguage} className="space-y-4">
           <div className="form-div">
-            <label>Выберите язык или введите свой</label>
-            <div className="flex gap-4 mb-2">
+            <label>{t('wizard.languages.selectOrEnter')}</label>
+            <div className="flex flex-col sm:flex-row gap-4 mb-2">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input
                   type="radio"
@@ -120,7 +122,7 @@ export default function StepLanguages() {
                   onChange={() => setUseCustom(false)}
                   className="w-5 h-5 cursor-pointer"
                 />
-                <span className="text-gray-700 group-hover:text-gray-900">Из списка</span>
+                <span className="text-gray-700 group-hover:text-gray-900">{t('wizard.languages.fromList')}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input
@@ -129,7 +131,7 @@ export default function StepLanguages() {
                   onChange={() => setUseCustom(true)}
                   className="w-5 h-5 cursor-pointer"
                 />
-                <span className="text-gray-700 group-hover:text-gray-900">Свой вариант</span>
+                <span className="text-gray-700 group-hover:text-gray-900">{t('wizard.languages.custom')}</span>
               </label>
             </div>
 
@@ -140,7 +142,7 @@ export default function StepLanguages() {
                 className="w-full p-4 inset-shadow rounded-2xl focus:outline-none bg-white"
                 required
               >
-                <option value="">Выберите язык</option>
+                <option value="">{t('wizard.languages.selectLanguage')}</option>
                 {commonLanguages.map((lang) => (
                   <option key={lang} value={lang}>
                     {lang}
@@ -152,14 +154,14 @@ export default function StepLanguages() {
                 type="text"
                 value={customLanguage}
                 onChange={(e) => setCustomLanguage(e.target.value)}
-                placeholder="Введите название языка"
+                placeholder={t('wizard.languages.languagePlaceholder')}
                 required
               />
             )}
           </div>
 
           <div className="form-div">
-            <label htmlFor="language-level">Уровень владения</label>
+            <label htmlFor="language-level">{t('wizard.languages.level')}</label>
             <select
               id="language-level"
               value={level}
@@ -174,17 +176,17 @@ export default function StepLanguages() {
             </select>
           </div>
 
-          <button type="submit" className="primary-button">
-            <p>Добавить язык</p>
+          <button type="submit" className="primary-button w-full">
+            <p>{t('wizard.languages.addLanguage')}</p>
           </button>
         </form>
 
-        <div className="flex gap-4 mt-8">
-          <button type="button" onClick={prevStep} className="secondary-button">
-            <p>Назад</p>
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <button type="button" onClick={prevStep} className="secondary-button w-full sm:w-1/2">
+            <p>{t('wizard.languages.back')}</p>
           </button>
-          <button type="button" onClick={nextStep} className="primary-button flex-1">
-            <p>Продолжить</p>
+          <button type="button" onClick={nextStep} className="primary-button w-full sm:w-1/2">
+            <p>{t('wizard.languages.continue')}</p>
           </button>
         </div>
       </div>

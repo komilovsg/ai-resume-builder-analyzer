@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useResumeStore } from "~/lib/resume-store";
 import { generateExperienceDescription } from "~/lib/resume-ai";
+import { useTranslation } from "react-i18next";
 
 export default function StepExperience() {
   const {
@@ -14,6 +15,7 @@ export default function StepExperience() {
     setGenerating,
     isGenerating,
   } = useResumeStore();
+  const { t } = useTranslation();
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -52,12 +54,12 @@ export default function StepExperience() {
     }
 
     if (!company.trim() || !position.trim() || !startDate) {
-      alert("Заполните все обязательные поля перед продолжением");
+      alert(t('wizard.experience.fillRequiredBeforeContinue'));
       return false;
     }
 
     if (!isPresent && !endDate) {
-      alert("Укажите дату окончания или отметьте 'По настоящее время'");
+      alert(t('wizard.experience.endDateRequired'));
       return false;
     }
 
@@ -108,24 +110,24 @@ export default function StepExperience() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Удалить этот опыт работы?")) {
+    if (confirm(t('wizard.experience.deleteConfirm'))) {
       removeExperience(id);
     }
   };
 
   const handleGenerateDescription = async () => {
     if (!rawDescription.trim()) {
-      alert("Пожалуйста, сначала введите информацию о том, чем вы занимались");
+      alert(t('wizard.experience.enterInfoFirst'));
       return;
     }
 
     if (!company.trim() || !position.trim()) {
-      alert("Пожалуйста, заполните название компании и должность");
+      alert(t('wizard.experience.fillRequiredFields'));
       return;
     }
 
     if (!resumeData.title) {
-      alert("Пожалуйста, сначала укажите название резюме");
+      alert(t('wizard.experience.enterTitleFirst'));
       return;
     }
 
@@ -141,7 +143,7 @@ export default function StepExperience() {
       setGeneratedDescription(description);
     } catch (error) {
       console.error("Error generating description:", error);
-      alert("Ошибка при генерации описания. Попробуйте еще раз.");
+      alert(t('wizard.experience.generationError'));
     } finally {
       setGenerating(false);
     }
@@ -149,10 +151,10 @@ export default function StepExperience() {
 
   return (
     <div className="wizard-step">
-      <h1 className="text-gradient">Опыт работы</h1>
-      <h2>Шаг 3: Добавьте опыт работы</h2>
+      <h1 className="text-gradient">{t('wizard.experience.title')}</h1>
+      <h2>{t('wizard.experience.subtitle')}</h2>
       <p className="text-dark-200 mb-6">
-        Добавьте места работы. Можно добавить несколько записей.
+        {t('wizard.experience.description')}
       </p>
 
       <div className="w-full max-w-2xl space-y-6">
@@ -166,7 +168,7 @@ export default function StepExperience() {
                     <h3 className="font-semibold text-lg">{exp.position}</h3>
                     <p className="text-gray-600">{exp.company}</p>
                     <p className="text-sm text-gray-500">
-                      {exp.period.start} - {exp.period.end || "По настоящее время"}
+                      {exp.period.start} - {exp.period.end || t('wizard.experience.presentTime')}
                     </p>
                     {exp.description && (
                       <div className="mt-2 text-sm whitespace-pre-line">
@@ -199,32 +201,32 @@ export default function StepExperience() {
         {/* Add Experience Form */}
         <form onSubmit={handleAddExperience} className="space-y-4">
           <div className="form-div">
-            <label htmlFor="company">Название компании *</label>
+            <label htmlFor="company">{t('wizard.experience.company')}</label>
             <input
               type="text"
               id="company"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
-              placeholder="Google"
+              placeholder={t('wizard.experience.companyPlaceholder')}
               required
             />
           </div>
 
           <div className="form-div">
-            <label htmlFor="position">Должность *</label>
+            <label htmlFor="position">{t('wizard.experience.position')}</label>
             <input
               type="text"
               id="position"
               value={position}
               onChange={(e) => setPosition(e.target.value)}
-              placeholder="Frontend Developer"
+              placeholder={t('wizard.experience.positionPlaceholder')}
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="form-div">
-              <label htmlFor="start-date">Дата начала *</label>
+              <label htmlFor="start-date">{t('wizard.experience.startDate')}</label>
               <input
                 type="month"
                 id="start-date"
@@ -235,7 +237,7 @@ export default function StepExperience() {
             </div>
 
             <div className="form-div">
-              <label htmlFor="end-date">Дата окончания</label>
+              <label htmlFor="end-date">{t('wizard.experience.endDate')}</label>
               <input
                 type="month"
                 id="end-date"
@@ -250,50 +252,50 @@ export default function StepExperience() {
                   checked={isPresent}
                   onChange={(e) => setIsPresent(e.target.checked)}
                 />
-                <span className="text-sm">По настоящее время</span>
+                <span className="text-sm">{t('wizard.experience.presentTime')}</span>
               </label>
             </div>
           </div>
 
           <div className="form-div">
             <label htmlFor="description-raw">
-              Чем занимались / Что сделали
+              {t('wizard.experience.jobDescription')}
             </label>
             <textarea
               id="description-raw"
               rows={4}
               value={rawDescription}
               onChange={(e) => setRawDescription(e.target.value)}
-              placeholder="Например: Разрабатывал пользовательские интерфейсы на React. Участвовал в code review. Оптимизировал производительность приложения..."
+              placeholder={t('wizard.experience.jobDescriptionPlaceholder')}
             />
             <div className="flex items-center gap-2 mt-2">
               <button
                 type="button"
                 onClick={handleGenerateDescription}
                 disabled={!rawDescription.trim() || isGenerating || !company.trim() || !position.trim()}
-                className={`primary-button px-6 py-2 text-sm ${
+                className={`primary-button w-full sm:w-auto sm:px-6 py-2 text-sm ${
                   !rawDescription.trim() || isGenerating || !company.trim() || !position.trim()
                     ? "opacity-50 cursor-not-allowed"
                     : ""
                 }`}
               >
-                <p>{isGenerating ? "Генерация..." : "✨ Сгенерировать с помощью AI"}</p>
+                <p>{isGenerating ? t('wizard.experience.generating') : t('wizard.experience.generateWithAI')}</p>
               </button>
             </div>
             {generatedDescription && (
               <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <label className="text-sm font-semibold text-gray-700 mb-2 block">
-                  Сгенерированное описание:
+                  {t('wizard.experience.generatedDescriptionLabel')}
                 </label>
                 <textarea
                   rows={5}
                   value={generatedDescription}
                   onChange={(e) => setGeneratedDescription(e.target.value)}
                   className="w-full p-3 bg-white rounded-lg border border-gray-300 text-sm"
-                  placeholder="Сгенерированное описание появится здесь..."
+                  placeholder={t('wizard.experience.generatedDescriptionPlaceholder')}
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  Вы можете редактировать сгенерированное описание при необходимости
+                  {t('wizard.experience.canEditDescription')}
                 </p>
               </div>
             )}
@@ -302,24 +304,24 @@ export default function StepExperience() {
           <button
             type="submit"
             disabled={isGenerating}
-            className="primary-button"
+            className="primary-button w-full"
           >
             <p>
-              {editingId ? "Сохранить изменения" : "Добавить опыт работы"}
+              {editingId ? t('wizard.experience.saveChanges') : t('wizard.experience.add')}
             </p>
           </button>
         </form>
 
-        <div className="flex gap-4 mt-8">
-          <button type="button" onClick={prevStep} className="secondary-button">
-            <p>Назад</p>
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <button type="button" onClick={prevStep} className="secondary-button w-full sm:w-1/2">
+            <p>{t('wizard.experience.back')}</p>
           </button>
           <button
             type="button"
             onClick={handleNextStep}
-            className="primary-button flex-1"
+            className="primary-button w-full sm:w-1/2"
           >
-            <p>Продолжить</p>
+            <p>{t('wizard.experience.continue')}</p>
           </button>
         </div>
       </div>

@@ -4,6 +4,9 @@ import { usePuterStore } from "~/lib/puter";
 import ResumePreview from "~/components/resume-preview/ResumePreview";
 import { prepareInstructions } from "../../constants";
 import { generateUUID } from "~/lib/utils";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "~/components/LanguageSwitcher";
+import Icon from "~/components/Icon";
 
 export function meta() {
   return [
@@ -16,6 +19,7 @@ export default function ResumePreviewPage() {
   const { auth, isLoading, kv, fs, ai } = usePuterStore();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [resumeNode, setResumeNode] = useState<HTMLDivElement | null>(null);
@@ -35,7 +39,7 @@ export default function ResumePreviewPage() {
       try {
         const resume = await kv.get(`resume:${id}`);
         if (!resume) {
-          alert("Резюме не найдено");
+          alert(t('preview.notFound'));
           navigate("/");
           return;
         }
@@ -44,7 +48,7 @@ export default function ResumePreviewPage() {
         setResumeData(data);
       } catch (error) {
         console.error("Error loading resume:", error);
-        alert("Ошибка при загрузке резюме");
+        alert(t('preview.loadError'));
         navigate("/");
       } finally {
         setLoading(false);
@@ -100,12 +104,12 @@ export default function ResumePreviewPage() {
   const handleEvaluate = async () => {
     if (!resumeData || !resumeNode || isEvaluating) return;
     setIsEvaluating(true);
-    setEvaluationStatus("Подготавливаем резюме...");
+      setEvaluationStatus(t('preview.preparing'));
     try {
       const canvas = await captureCanvas(resumeNode);
       const imageBlob = await canvasToBlob(canvas, "image/png");
 
-      setEvaluationStatus("Формируем PDF...");
+      setEvaluationStatus(t('preview.creatingPDF'));
       const jsPDFModule = await import("jspdf");
       const { jsPDF } = jsPDFModule;
       const pdf = new jsPDF({
@@ -132,7 +136,7 @@ export default function ResumePreviewPage() {
 
       const pdfBlob = pdf.output("blob");
 
-      setEvaluationStatus("Загружаем файлы...");
+      setEvaluationStatus(t('preview.uploading'));
       const pdfFile = new File([pdfBlob], `resume-${resumeData.id || "preview"}.pdf`, {
         type: "application/pdf",
       });
@@ -143,7 +147,7 @@ export default function ResumePreviewPage() {
       const uploadedPdf = await fs.upload([pdfFile]);
       const uploadedImage = await fs.upload([imageFile]);
       if (!uploadedPdf || !uploadedImage) {
-        throw new Error("Не удалось загрузить файлы");
+        throw new Error(t('preview.uploadError'));
       }
 
       const evaluationId = generateUUID();
@@ -165,14 +169,14 @@ export default function ResumePreviewPage() {
 
       await kv.set(`resume:${evaluationId}`, JSON.stringify(analysisRecord));
 
-      setEvaluationStatus("Запрашиваем оценку AI...");
+      setEvaluationStatus(t('preview.requestingAI'));
       const instructions = prepareInstructions({
         jobTitle: resumeData.title,
         jobDescription: resumeData.about || "",
       });
       const feedbackResponse = await ai.feedback(uploadedPdf.path, instructions);
       if (!feedbackResponse) {
-        throw new Error("AI не вернул ответ");
+        throw new Error(t('preview.aiError'));
       }
 
       const feedbackText =
@@ -187,13 +191,13 @@ export default function ResumePreviewPage() {
 
       analysisRecord.feedback = JSON.parse(feedbackText);
       await kv.set(`resume:${evaluationId}`, JSON.stringify(analysisRecord));
-      setEvaluationStatus("Готово! Перенаправляем на страницу оценки...");
+      setEvaluationStatus(t('preview.redirecting'));
       setIsEvaluating(false);
       navigate(`/resume/${evaluationId}`);
     } catch (error) {
       console.error(error);
       setEvaluationStatus(
-        error instanceof Error ? error.message : "Не удалось оценить резюме. Попробуйте ещё раз."
+        error instanceof Error ? error.message : t('preview.error')
       );
       setIsEvaluating(false);
     }
@@ -203,28 +207,38 @@ export default function ResumePreviewPage() {
     <main className="!pt-0 resume-preview-page">
       <nav className="resume-nav">
         <Link to="/" className="back-button">
-          <img src="/icons/back.svg" alt="back" className="w-2.5 h-2.5" />
-          <span className="text-gray-800 text-sm font-semibold">
-            Назад на главную
+          <Icon name="back" className="text-gray-800 md:w-2.5 md:h-2.5 w-5 h-5" size={20} />
+          <span className="text-gray-800 text-sm font-semibold hidden sm:inline">
+            {t('preview.back')}
           </span>
         </Link>
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-row items-center gap-2 sm:gap-3">
+          <div className="hidden sm:block">
+            <LanguageSwitcher />
+          </div>
           {id && (
             <Link
               to={`/create?resumeId=${id}`}
-              className="secondary-button !w-auto !px-6 !py-2 text-sm font-semibold"
+              className="secondary-button !w-auto !px-3 !py-2 sm:!px-6 text-sm font-semibold flex items-center justify-center gap-2"
+              title={t('preview.edit')}
             >
-              <p>Редактировать</p>
+              <Icon name="edit" className="sm:hidden text-gray-700" size={18} />
+              <span className="hidden sm:inline">{t('preview.edit')}</span>
             </Link>
           )}
           <button
             type="button"
             onClick={handleEvaluate}
             disabled={isEvaluating}
-            className="primary-button !w-auto !px-6 !py-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="primary-button !w-auto !px-3 !py-2 sm:!px-6 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            title={isEvaluating ? t('preview.evaluating') : t('preview.evaluate')}
           >
-            <p>{isEvaluating ? "Оценка..." : "Оценить резюме"}</p>
+            <Icon name="evaluate" className="sm:hidden text-white" size={18} />
+            <span className="hidden sm:inline">{isEvaluating ? t('preview.evaluating') : t('preview.evaluate')}</span>
           </button>
+          <div className="sm:hidden">
+            <LanguageSwitcher />
+          </div>
         </div>
       </nav>
       {evaluationStatus && (

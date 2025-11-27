@@ -27,12 +27,22 @@ export default function Create() {
     }
   }, [auth.isAuthenticated, isLoading, navigate]);
 
+  // Создание нового резюме - очищаем старое состояние
   useEffect(() => {
     if (!resumeId) {
-      if (!resumeData?.id) {
-        initializeResume();
-      }
-      return;
+      // При создании нового резюме всегда сбрасываем старое состояние
+      // Это очистит localStorage и начнет с чистого листа
+      reset();
+      initializeResume();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeId]); // Зависим только от resumeId, чтобы не вызывать повторно
+  // reset и initializeResume - стабильные функции из Zustand store
+
+  // Загрузка существующего резюме для редактирования
+  useEffect(() => {
+    if (!resumeId) {
+      return; // Если это новое резюме, ничего не загружаем
     }
 
     let isMounted = true;
@@ -69,7 +79,7 @@ export default function Create() {
     return () => {
       isMounted = false;
     };
-  }, [resumeId, kv, hydrateResume, initializeResume, resumeData?.id]);
+  }, [resumeId, kv, hydrateResume]);
 
   return (
     <main className="bg-[url('/images/bg-main.svg')] bg-cover">

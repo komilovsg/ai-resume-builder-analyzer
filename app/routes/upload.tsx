@@ -20,54 +20,81 @@ export default function Upload() {
 
     const handlerAnalyze = async({companyName, jobTitle, jobDescription, file}: {companyName: string, jobTitle: string, jobDescription: string, file: File}) => {
         setIsProcessing(true);
-        setStatusText("Analyzing resume...");
-        const uploadedFile = await fs.upload([file]);
+        try {
+            setStatusText("Analyzing resume...");
+            const uploadedFile = await fs.upload([file]);
 
-        if(!uploadedFile) return setStatusText("Error: Failed to upload resume");
-        setStatusText("Converting to image...");
-        const imageFile = await convertPdfToImage(file);
-        if(!imageFile.file) return setStatusText("Error: Failed to convert PDF to image");
-        setStatusText("Uploading image...");
-        const uploadedImage = await fs.upload([imageFile.file]);
-        if(!uploadedImage) return setStatusText("Error: Failed to upload image");
-        
-        setStatusText("Analyzing image...");
+            if(!uploadedFile) {
+                setStatusText("Error: Failed to upload resume");
+                setIsProcessing(false);
+                return;
+            }
+            
+            setStatusText("Converting to image...");
+            const imageFile = await convertPdfToImage(file);
+            
+            if(!imageFile.file) {
+                const errorMessage = imageFile.error 
+                    ? `Error: Failed to convert PDF to image - ${imageFile.error}` 
+                    : "Error: Failed to convert PDF to image";
+                console.error("PDF conversion error:", imageFile.error);
+                setStatusText(errorMessage);
+                setIsProcessing(false);
+                return;
+            }
+            
+            setStatusText("Uploading image...");
+            const uploadedImage = await fs.upload([imageFile.file]);
+            if(!uploadedImage) {
+                setStatusText("Error: Failed to upload image");
+                setIsProcessing(false);
+                return;
+            }
+            
+            setStatusText("Analyzing image...");
 
-        const uuid = generateUUID();
-        const data = {
-            id: uuid,
-            resumePath: uploadedFile.path,
-            imagePath: uploadedImage.path,
-            companyName,
-            jobTitle,
-            jobDescription,
-            feedback: '',
+            const uuid = generateUUID();
+            const data = {
+                id: uuid,
+                resumePath: uploadedFile.path,
+                imagePath: uploadedImage.path,
+                companyName,
+                jobTitle,
+                jobDescription,
+                feedback: '',
+            }
+
+            await kv.set(`resume:${uuid}`, JSON.stringify(data));
+            setStatusText("Analyzing...");
+
+            const feedback = await ai.feedback(
+                uploadedFile.path, 
+                prepareInstructions({jobTitle, jobDescription})
+            );
+
+            if(!feedback) {
+                setStatusText("Error: Failed to analyze resume");
+                setIsProcessing(false);
+                return;
+            }
+
+            const feedbackText = typeof feedback.message.content === 'string' 
+                ? feedback.message.content 
+                : Array.isArray(feedback.message.content) && feedback.message.content[0] && typeof feedback.message.content[0] === 'object' && 'text' in feedback.message.content[0]
+                ? feedback.message.content[0].text
+                : String(feedback.message.content);
+
+
+            data.feedback = JSON.parse(feedbackText);
+            await kv.set(`resume:${uuid}`, JSON.stringify(data));
+            setStatusText("Analyzes complete, redirecting...");
+            console.log(data);
+            navigate(`/resume/${uuid}`);
+        } catch (error) {
+            console.error("Error in handlerAnalyze:", error);
+            setStatusText(`Error: ${error instanceof Error ? error.message : 'An unexpected error occurred'}`);
+            setIsProcessing(false);
         }
-
-        await kv.set(`resume:${uuid}`, JSON.stringify(data));
-        setStatusText("Analyzing...");
-
-        const feedback = await ai.feedback(
-            uploadedFile.path, 
-            prepareInstructions({jobTitle, jobDescription})
-        );
-
-        if(!feedback) return setStatusText("Error: Failed to analyze resume");
-
-        const feedbackText = typeof feedback.message.content === 'string' 
-            ? feedback.message.content 
-            : Array.isArray(feedback.message.content) && feedback.message.content[0] && typeof feedback.message.content[0] === 'object' && 'text' in feedback.message.content[0]
-            ? feedback.message.content[0].text
-            : String(feedback.message.content);
-
-
-        data.feedback = JSON.parse(feedbackText);
-        await kv.set(`resume:${uuid}`, JSON.stringify(data));
-        setStatusText("Analyzes complete, redirecting...");
-        console.log(data);
-        navigate(`/resume/${uuid}`);
-        
-        
     }
 
 
@@ -98,7 +125,21 @@ export default function Upload() {
                     {isProcessing ? (
                         <>
                             <h2>{statusText}</h2>
-                            <img src='/images/resume-scan.gif' className="w-full" />
+                            {statusText.includes("Error:") ? (
+                                <div className="mt-4">
+                                    <button 
+                                        onClick={() => {
+                                            setIsProcessing(false);
+                                            setStatusText(" ");
+                                        }}
+                                        className="primary-button"
+                                    >
+                                        Try Again
+                                    </button>
+                                </div>
+                            ) : (
+                                <img src='/images/resume-scan.gif' className="w-full" />
+                            )}
                         </>
                     ) : (
                         <>

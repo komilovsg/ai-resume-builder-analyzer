@@ -1,9 +1,11 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useResumeStore } from "~/lib/resume-store";
+import { useTranslation } from "react-i18next";
 
 export default function StepTitle() {
   const { resumeData, setTitle, setPersonalInfo, nextStep } = useResumeStore();
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState(resumeData.fullName || "");
   const [title, setTitleLocal] = useState(resumeData.title || "");
   const [location, setLocation] = useState(resumeData.location || "");
@@ -27,7 +29,7 @@ export default function StepTitle() {
     }
 
     if (!trimmedEmail || !trimmedPhone) {
-      alert("Укажите как минимум email и телефон, чтобы работодатели могли связаться с вами.");
+      alert(t('wizard.title.contactRequired'));
       return;
     }
 
@@ -45,34 +47,34 @@ export default function StepTitle() {
 
   return (
     <div className="wizard-step">
-      <h1 className="text-gradient">Создание резюме</h1>
-      <h2>Шаг 1: Личные данные и контакты</h2>
+      <h1 className="text-gradient">{t('wizard.title.title')}</h1>
+      <h2>{t('wizard.title.subtitle')}</h2>
       <p className="text-dark-200 mb-6">
-        Укажите целевую должность и контактные данные, чтобы рекрутеры могли связаться с вами
+        {t('wizard.title.description')}
       </p>
 
       <form onSubmit={handleSubmit} className="w-full max-w-2xl">
         <div className="form-div">
-          <label htmlFor="resume-fullname">ФИО *</label>
+          <label htmlFor="resume-fullname">{t('wizard.title.fullName')}</label>
           <input
             type="text"
             id="resume-fullname"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Иван Иванов"
+            placeholder={t('wizard.title.fullNamePlaceholder')}
             required
             className="w-full"
           />
         </div>
 
         <div className="form-div">
-          <label htmlFor="resume-title">Название резюме / Профессия *</label>
+          <label htmlFor="resume-title">{t('wizard.title.resumeTitle')}</label>
           <input
             type="text"
             id="resume-title"
             value={title}
             onChange={(e) => setTitleLocal(e.target.value)}
-            placeholder="Frontend Developer"
+            placeholder={t('wizard.title.resumeTitlePlaceholder')}
             required
             className="w-full"
           />
@@ -80,36 +82,36 @@ export default function StepTitle() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="form-div">
-            <label htmlFor="resume-location">Город / Страна</label>
+            <label htmlFor="resume-location">{t('wizard.title.location')}</label>
             <input
               type="text"
               id="resume-location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Ташкент, Узбекистан"
+              placeholder={t('wizard.title.locationPlaceholder')}
             />
           </div>
 
           <div className="form-div">
-            <label htmlFor="resume-email">Email *</label>
+            <label htmlFor="resume-email">{t('wizard.title.email')}</label>
             <input
               type="email"
               id="resume-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={t('wizard.title.emailPlaceholder')}
               required
             />
           </div>
 
           <div className="form-div">
-            <label htmlFor="resume-phone">Телефон *</label>
+            <label htmlFor="resume-phone">{t('wizard.title.phone')}</label>
             <input
               type="tel"
               id="resume-phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+7 999 123-45-67"
+              placeholder={t('wizard.title.phonePlaceholder')}
               required
             />
           </div>
@@ -117,30 +119,30 @@ export default function StepTitle() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="form-div">
-            <label htmlFor="resume-linkedin">LinkedIn</label>
+            <label htmlFor="resume-linkedin">{t('wizard.title.linkedin')}</label>
             <input
               type="url"
               id="resume-linkedin"
               value={linkedin}
               onChange={(e) => setLinkedin(e.target.value)}
-              placeholder="https://www.linkedin.com/in/username"
+              placeholder={t('wizard.title.linkedinPlaceholder')}
             />
           </div>
 
           <div className="form-div">
-            <label htmlFor="resume-telegram">Telegram</label>
+            <label htmlFor="resume-telegram">{t('wizard.title.telegram')}</label>
             <input
               type="text"
               id="resume-telegram"
               value={telegram}
               onChange={(e) => setTelegram(e.target.value)}
-              placeholder="@username или https://t.me/username"
+              placeholder={t('wizard.title.telegramPlaceholder')}
             />
           </div>
         </div>
 
-        <button type="submit" className="primary-button mt-8">
-          <p>Продолжить</p>
+        <button type="submit" className="primary-button mt-8 w-full">
+          <p>{t('wizard.title.continue')}</p>
         </button>
       </form>
     </div>

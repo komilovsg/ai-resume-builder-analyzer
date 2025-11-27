@@ -6,15 +6,7 @@ import StepExperience from "./StepExperience";
 import StepSkills from "./StepSkills";
 import StepLanguages from "./StepLanguages";
 import StepRecommendations from "./StepRecommendations";
-
-const steps = [
-  { number: 1, title: "Название резюме" },
-  { number: 2, title: "О себе" },
-  { number: 3, title: "Опыт работы" },
-  { number: 4, title: "Навыки" },
-  { number: 5, title: "Языки" },
-  { number: 6, title: "Рекомендации" },
-];
+import { useTranslation } from "react-i18next";
 
 interface ResumeWizardProps {
   autoInit?: boolean;
@@ -26,6 +18,16 @@ export default function ResumeWizard({
   enableStepNavigation = false,
 }: ResumeWizardProps) {
   const { currentStep, resumeData, initializeResume, reset, setCurrentStep } = useResumeStore();
+  const { t } = useTranslation();
+  
+  const steps = [
+    { number: 1, title: t('wizard.steps.step1') },
+    { number: 2, title: t('wizard.steps.step2') },
+    { number: 3, title: t('wizard.steps.step3') },
+    { number: 4, title: t('wizard.steps.step4') },
+    { number: 5, title: t('wizard.steps.step5') },
+    { number: 6, title: t('wizard.steps.step6') },
+  ];
 
   useEffect(() => {
     if (!autoInit) return;

@@ -2,21 +2,23 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useResumeStore } from "~/lib/resume-store";
 import { generateAboutText } from "~/lib/resume-ai";
+import { useTranslation } from "react-i18next";
 
 export default function StepAbout() {
   const { resumeData, setAbout, setAboutRaw, nextStep, prevStep, setGenerating, setGenerationError, isGenerating } =
     useResumeStore();
+  const { t } = useTranslation();
   const [rawText, setRawText] = useState(resumeData.aboutRaw || "");
   const [generatedText, setGeneratedText] = useState(resumeData.about || "");
 
   const handleGenerate = async () => {
     if (!rawText.trim()) {
-      alert("Пожалуйста, сначала введите информацию о себе");
+      alert(t('wizard.about.enterInfoFirst'));
       return;
     }
 
     if (!resumeData.title) {
-      alert("Пожалуйста, сначала укажите название резюме");
+      alert(t('wizard.about.enterTitleFirst'));
       return;
     }
 
@@ -30,9 +32,9 @@ export default function StepAbout() {
       setAboutRaw(rawText);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Ошибка генерации текста";
+        error instanceof Error ? error.message : t('wizard.about.generationError');
       setGenerationError(errorMessage);
-      alert(`Ошибка: ${errorMessage}`);
+      alert(`${t('wizard.about.generationError')}: ${errorMessage}`);
     } finally {
       setGenerating(false);
     }
@@ -49,22 +51,21 @@ export default function StepAbout() {
 
   return (
     <div className="wizard-step">
-      <h1 className="text-gradient">О себе</h1>
-      <h2>Шаг 2: Расскажите о себе</h2>
+      <h1 className="text-gradient">{t('wizard.about.title')}</h1>
+      <h2>{t('wizard.about.subtitle')}</h2>
       <p className="text-dark-200 mb-6">
-        Введите информацию о себе, и мы поможем создать профессиональный текст
-        для резюме
+        {t('wizard.about.description')}
       </p>
 
       <form onSubmit={handleSubmit} className="w-full max-w-2xl">
         <div className="form-div">
-          <label htmlFor="about-raw">Информация о себе</label>
+          <label htmlFor="about-raw">{t('wizard.about.rawText')}</label>
           <textarea
             id="about-raw"
             rows={6}
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
-            placeholder="Например: Работаю фронтенд-разработчиком 5 лет. Специализируюсь на React и TypeScript. Участвовал в разработке крупных проектов..."
+            placeholder={t('wizard.about.rawTextPlaceholder')}
             className="w-full"
           />
         </div>
@@ -73,38 +74,38 @@ export default function StepAbout() {
           type="button"
           onClick={handleGenerate}
           disabled={!rawText.trim() || isGenerating}
-          className={`primary-button mt-4 ${!rawText.trim() || isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`primary-button mt-4 w-full ${!rawText.trim() || isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
         >
-          <p>{isGenerating ? "Генерация..." : "Сгенерировать с помощью AI"}</p>
+          <p>{isGenerating ? t('wizard.about.generating') : t('wizard.about.generateWithAI')}</p>
         </button>
 
         {generatedText && (
           <div className="form-div mt-6">
-            <label htmlFor="about-generated">Сгенерированный текст</label>
+            <label htmlFor="about-generated">{t('wizard.about.generatedText')}</label>
             <textarea
               id="about-generated"
               rows={4}
               value={generatedText}
               onChange={(e) => setGeneratedText(e.target.value)}
               className="w-full"
-              placeholder="Здесь появится сгенерированный текст..."
+              placeholder={t('wizard.about.generatedPlaceholder')}
             />
             <p className="text-sm text-gray-500 mt-2">
-              Вы можете редактировать сгенерированный текст при необходимости
+              {t('wizard.about.canEdit')}
             </p>
           </div>
         )}
 
-        <div className="flex gap-4 mt-8">
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
           <button
             type="button"
             onClick={prevStep}
-            className="secondary-button"
+            className="secondary-button w-full sm:w-1/2"
           >
-            <p>Назад</p>
+            <p>{t('wizard.about.back')}</p>
           </button>
-          <button type="submit" className="primary-button flex-1">
-            <p>Продолжить</p>
+          <button type="submit" className="primary-button w-full sm:w-1/2">
+            <p>{t('wizard.about.continue')}</p>
           </button>
         </div>
       </form>

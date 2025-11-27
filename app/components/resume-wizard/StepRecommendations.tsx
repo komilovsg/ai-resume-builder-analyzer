@@ -3,12 +3,14 @@ import type { FormEvent } from "react";
 import { useResumeStore } from "~/lib/resume-store";
 import { useNavigate } from "react-router";
 import { usePuterStore } from "~/lib/puter";
+import { useTranslation } from "react-i18next";
 
 export default function StepRecommendations() {
   const { resumeData, addRecommendation, removeRecommendation, prevStep, initializeResume } =
     useResumeStore();
   const { kv } = usePuterStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [name, setName] = useState("");
   const [position, setPosition] = useState("");
@@ -20,7 +22,7 @@ export default function StepRecommendations() {
     e.preventDefault();
 
     if (!name.trim() || !position.trim() || !contact.trim()) {
-      alert("Заполните все поля");
+      alert(t('wizard.recommendations.fillAll'));
       return;
     }
 
@@ -38,7 +40,7 @@ export default function StepRecommendations() {
 
   const handleFinish = async () => {
     if (!resumeData.title) {
-      alert("Пожалуйста, заполните название резюме");
+      alert(t('wizard.recommendations.enterTitleFirst'));
       return;
     }
 
@@ -71,23 +73,23 @@ export default function StepRecommendations() {
       navigate(`/resume/${finalResume.id}/preview`);
     } catch (error) {
       console.error("Error saving resume:", error);
-      alert("Ошибка при сохранении резюме. Попробуйте еще раз.");
+      alert(t('wizard.recommendations.saveError'));
     }
   };
 
   return (
     <div className="wizard-step">
-      <h1 className="text-gradient">Рекомендации</h1>
-      <h2>Шаг 6: Добавьте рекомендации (необязательно)</h2>
+      <h1 className="text-gradient">{t('wizard.recommendations.title')}</h1>
+      <h2>{t('wizard.recommendations.subtitle')}</h2>
       <p className="text-dark-200 mb-6">
-        Если у вас есть рекомендации, добавьте их. Это необязательный шаг.
+        {t('wizard.recommendations.description')}
       </p>
 
       <div className="w-full max-w-2xl space-y-6">
         {/* Current Recommendations */}
         {recommendations.length > 0 && (
           <div>
-            <h3 className="font-semibold mb-3">Ваши рекомендации:</h3>
+            <h3 className="font-semibold mb-3">{t('wizard.recommendations.yourRecommendations')}</h3>
             <div className="space-y-2">
               {recommendations.map((rec) => (
                 <div
@@ -115,56 +117,56 @@ export default function StepRecommendations() {
         {/* Add Recommendation Form */}
         <form onSubmit={handleAddRecommendation} className="space-y-4">
           <div className="form-div">
-            <label htmlFor="rec-name">ФИО *</label>
+            <label htmlFor="rec-name">{t('wizard.recommendations.name')}</label>
             <input
               type="text"
               id="rec-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Иван Иванов"
+              placeholder={t('wizard.recommendations.namePlaceholder')}
               required
             />
           </div>
 
           <div className="form-div">
-            <label htmlFor="rec-position">Должность *</label>
+            <label htmlFor="rec-position">{t('wizard.recommendations.position')}</label>
             <input
               type="text"
               id="rec-position"
               value={position}
               onChange={(e) => setPosition(e.target.value)}
-              placeholder="Team Lead"
+              placeholder={t('wizard.recommendations.positionPlaceholder')}
               required
             />
           </div>
 
           <div className="form-div">
-            <label htmlFor="rec-contact">Контактные данные *</label>
+            <label htmlFor="rec-contact">{t('wizard.recommendations.contact')}</label>
             <input
               type="text"
               id="rec-contact"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
-              placeholder="email@example.com или +7 (999) 123-45-67"
+              placeholder={t('wizard.recommendations.contactPlaceholder')}
               required
             />
           </div>
 
-          <button type="submit" className="primary-button">
-            <p>Добавить рекомендацию</p>
+          <button type="submit" className="primary-button w-full">
+            <p>{t('wizard.recommendations.add')}</p>
           </button>
         </form>
 
-        <div className="flex gap-4 mt-8">
-          <button type="button" onClick={prevStep} className="secondary-button">
-            <p>Назад</p>
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <button type="button" onClick={prevStep} className="secondary-button w-full sm:w-1/2">
+            <p>{t('wizard.recommendations.back')}</p>
           </button>
           <button
             type="button"
             onClick={handleFinish}
-            className="primary-button flex-1"
+            className="primary-button w-full sm:w-1/2"
           >
-            <p>Завершить и просмотреть</p>
+            <p>{t('wizard.recommendations.finish')}</p>
           </button>
         </div>
       </div>
