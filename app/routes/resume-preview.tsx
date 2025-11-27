@@ -7,8 +7,8 @@ import { generateUUID } from "~/lib/utils";
 
 export function meta() {
   return [
-    { title: "Resumind | Предпросмотр резюме" },
-    { name: "description", content: "Предпросмотр вашего резюме" },
+    { title: "ARBA | Resume Preview" },
+    { name: "description", content: "Resume Preview" },
   ];
 }
 

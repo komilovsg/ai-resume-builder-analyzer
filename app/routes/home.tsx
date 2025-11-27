@@ -11,8 +11,8 @@ import "toastify-js/src/toastify.css";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Resumind" },
-    { name: "description", content: "Smart feedback for your dream resume!" },
+    { title: "ARBA" },
+    { name: "description", content: "AI-Resume Builder and Analyzer" },
   ];
 }
 

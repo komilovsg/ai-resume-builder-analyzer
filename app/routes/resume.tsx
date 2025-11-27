@@ -7,7 +7,7 @@ import { usePuterStore } from "~/lib/puter";
 
 export const meta = () => {
   [
-    { title: "Resumind | Review" },
+    { title: "ARBA | Review" },
     { name: "description", content: "Detailed overview of your resume" },
   ];
 };

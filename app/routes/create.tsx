@@ -7,7 +7,7 @@ import { useResumeStore } from "~/lib/resume-store";
 
 export function meta() {
   return [
-    { title: "Resumind | Создать резюме" },
+    { title: "ARBA | Create Resume" },
     { name: "description", content: "Создайте профессиональное резюме с помощью AI" },
   ];
 }
