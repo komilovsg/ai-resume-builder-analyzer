@@ -213,7 +213,7 @@ export default function Home() {
 
             {newResumes.length > 0 && (
               <div className="w-full max-w-6xl mt-8">
-                <h2 className="text-2xl font-bold mb-4">{t('home.createdResumes')}</h2>
+                <h2 className="text-2xl font-bold mb-4 text-center">{t('home.createdResumes')}</h2>
                 <div className="resumes-section">
                   {newResumes.map((resume) => (
                     <ResumeCardNew
