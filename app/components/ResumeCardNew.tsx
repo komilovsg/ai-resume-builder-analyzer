@@ -67,7 +67,7 @@ export default function ResumeCardNew({
 
   return (
     <div className="relative group">
-      <div className="absolute -top-3 -right-3 z-10 flex gap-2 opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto">
+      <div className="absolute -top-3 -right-3 z-10 flex gap-2 opacity-0 pointer-events-none transition-all duration-200 group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto">
         <button
           type="button"
           onClick={handleEditClick}

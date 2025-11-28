@@ -19,7 +19,7 @@ export default function ResumePreviewPage() {
   const { auth, isLoading, kv, fs, ai } = usePuterStore();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [resumeNode, setResumeNode] = useState<HTMLDivElement | null>(null);
@@ -173,6 +173,7 @@ export default function ResumePreviewPage() {
       const instructions = prepareInstructions({
         jobTitle: resumeData.title,
         jobDescription: resumeData.about || "",
+        language: i18n.language,
       });
       const feedbackResponse = await ai.feedback(uploadedPdf.path, instructions);
       if (!feedbackResponse) {

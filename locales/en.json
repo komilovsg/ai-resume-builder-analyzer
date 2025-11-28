@@ -184,5 +184,47 @@
     "exporting": "Exporting...",
     "notFound": "Resume not found",
     "loadError": "Error loading resume"
+  },
+  "upload": {
+    "title": "Smart feedback for your dream job",
+    "subtitle": "Drop your resume for an ATS score and improvement tips",
+    "companyName": "Company Name",
+    "companyNamePlaceholder": "Company name",
+    "jobTitle": "Job Title",
+    "jobTitlePlaceholder": "Job title",
+    "jobDescription": "Job Description",
+    "jobDescriptionPlaceholder": "Job description",
+    "uploadResume": "Upload Resume",
+    "analyzeResume": "Analyze Resume",
+    "tryAgain": "Try Again",
+    "statusAnalyzing": "Analyzing resume...",
+    "statusConverting": "Converting to image...",
+    "statusUploading": "Uploading image...",
+    "statusAnalyzingImage": "Analyzing image...",
+    "statusAnalyzingFinal": "Analyzing...",
+    "statusComplete": "Analyzes complete, redirecting...",
+    "errorUploadResume": "Error: Failed to upload resume",
+    "errorConvertPDF": "Error: Failed to convert PDF to image",
+    "errorUploadImage": "Error: Failed to upload image",
+    "errorAnalyzeResume": "Error: Failed to analyze resume",
+    "errorUnexpected": "An unexpected error occurred"
+  },
+  "resumeReview": {
+    "backToHomepage": "Back to Homepage",
+    "title": "Resume Review",
+    "resumeScore": "Your Resume Score",
+    "scoreDescription": "This score is calculated based on the variables listed below.",
+    "categories": {
+      "toneAndStyle": "Tone & Style",
+      "content": "Content",
+      "structure": "Structure",
+      "skills": "Skills"
+    },
+    "ats": {
+      "score": "ATS Score",
+      "title": "Applicant Tracking System compatibility",
+      "description": "Below are quick recommendations tailored to improve your resume's match with automated screening systems.",
+      "footer": "Keep iterating—incremental improvements can significantly boost your ATS compatibility."
+    }
   }
 }

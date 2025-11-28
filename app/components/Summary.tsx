@@ -1,5 +1,6 @@
 import ScoreGauge from "./ScoreGauge";
 import ScoreBadge from "./ScoreBadge";
+import { useTranslation } from "react-i18next";
 
 const Category = ({ title, score }: { title: string; score: number }) => {
   const textColor =
@@ -24,21 +25,22 @@ const Category = ({ title, score }: { title: string; score: number }) => {
 };
 
 export default function Summary({ feedback }: { feedback: Feedback }) {
+  const { t } = useTranslation();
   return (
     <div className="fbg-white rounded-2xl shadow-md w-full">
       <div className="flex flex-row items-center p-4 gap-8">
         <ScoreGauge score={feedback.overallScore} />
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold">Your Resume Score</h2>
+          <h2 className="text-2xl font-bold">{t('resumeReview.resumeScore')}</h2>
           <p className="text-sm text-gray-500">
-            This score is calculated based on the variables listed below.
+            {t('resumeReview.scoreDescription')}
           </p>
         </div>
       </div>
-      <Category title="Tone & Style" score={feedback.toneAndStyle.score} />
-      <Category title="Content" score={feedback.content.score} />
-      <Category title="Structure" score={feedback.structure.score} />
-      <Category title="Skills" score={feedback.skills.score} />
+      <Category title={t('resumeReview.categories.toneAndStyle')} score={feedback.toneAndStyle.score} />
+      <Category title={t('resumeReview.categories.content')} score={feedback.content.score} />
+      <Category title={t('resumeReview.categories.structure')} score={feedback.structure.score} />
+      <Category title={t('resumeReview.categories.skills')} score={feedback.skills.score} />
     </div>
   );
 }

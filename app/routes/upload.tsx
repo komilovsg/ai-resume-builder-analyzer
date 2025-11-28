@@ -6,10 +6,12 @@ import Navbar from "~/components/Navbar";
 import { convertPdfToImage } from "~/lib/pdf2img";
 import { usePuterStore } from "~/lib/puter";
 import { generateUUID } from "~/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export default function Upload() {
     const {auth, isLoading, fs, ai, kv} = usePuterStore();
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
     const [isProcessing, setIsProcessing] = useState(false);
     const [statusText, setStatusText] = useState(" ");
     const [file, setFile] = useState<File | null>(null);
@@ -21,37 +23,37 @@ export default function Upload() {
     const handlerAnalyze = async({companyName, jobTitle, jobDescription, file}: {companyName: string, jobTitle: string, jobDescription: string, file: File}) => {
         setIsProcessing(true);
         try {
-            setStatusText("Analyzing resume...");
+            setStatusText(t('upload.statusAnalyzing'));
             const uploadedFile = await fs.upload([file]);
 
             if(!uploadedFile) {
-                setStatusText("Error: Failed to upload resume");
+                setStatusText(t('upload.errorUploadResume'));
                 setIsProcessing(false);
                 return;
             }
             
-            setStatusText("Converting to image...");
+            setStatusText(t('upload.statusConverting'));
             const imageFile = await convertPdfToImage(file);
             
             if(!imageFile.file) {
                 const errorMessage = imageFile.error 
-                    ? `Error: Failed to convert PDF to image - ${imageFile.error}` 
-                    : "Error: Failed to convert PDF to image";
+                    ? `${t('upload.errorConvertPDF')} - ${imageFile.error}` 
+                    : t('upload.errorConvertPDF');
                 console.error("PDF conversion error:", imageFile.error);
                 setStatusText(errorMessage);
                 setIsProcessing(false);
                 return;
             }
             
-            setStatusText("Uploading image...");
+            setStatusText(t('upload.statusUploading'));
             const uploadedImage = await fs.upload([imageFile.file]);
             if(!uploadedImage) {
-                setStatusText("Error: Failed to upload image");
+                setStatusText(t('upload.errorUploadImage'));
                 setIsProcessing(false);
                 return;
             }
             
-            setStatusText("Analyzing image...");
+            setStatusText(t('upload.statusAnalyzingImage'));
 
             const uuid = generateUUID();
             const data = {
@@ -65,15 +67,15 @@ export default function Upload() {
             }
 
             await kv.set(`resume:${uuid}`, JSON.stringify(data));
-            setStatusText("Analyzing...");
+            setStatusText(t('upload.statusAnalyzingFinal'));
 
             const feedback = await ai.feedback(
                 uploadedFile.path, 
-                prepareInstructions({jobTitle, jobDescription})
+                prepareInstructions({jobTitle, jobDescription, language: i18n.language})
             );
 
             if(!feedback) {
-                setStatusText("Error: Failed to analyze resume");
+                setStatusText(t('upload.errorAnalyzeResume'));
                 setIsProcessing(false);
                 return;
             }
@@ -87,12 +89,12 @@ export default function Upload() {
 
             data.feedback = JSON.parse(feedbackText);
             await kv.set(`resume:${uuid}`, JSON.stringify(data));
-            setStatusText("Analyzes complete, redirecting...");
+            setStatusText(t('upload.statusComplete'));
             console.log(data);
             navigate(`/resume/${uuid}`);
         } catch (error) {
             console.error("Error in handlerAnalyze:", error);
-            setStatusText(`Error: ${error instanceof Error ? error.message : 'An unexpected error occurred'}`);
+            setStatusText(`${t('upload.errorUnexpected')}: ${error instanceof Error ? error.message : t('upload.errorUnexpected')}`);
             setIsProcessing(false);
         }
     }
@@ -121,11 +123,11 @@ export default function Upload() {
             <Navbar />
             <section className="main-section">
                 <div className="page-heading py-16">
-                    <h1>Smart feedback for your dream job</h1>
+                    <h1>{t('upload.title')}</h1>
                     {isProcessing ? (
                         <>
                             <h2>{statusText}</h2>
-                            {statusText.includes("Error:") ? (
+                            {(statusText.includes('Error:') || statusText.includes('Ошибка:')) ? (
                                 <div className="mt-4">
                                     <button 
                                         onClick={() => {
@@ -134,38 +136,38 @@ export default function Upload() {
                                         }}
                                         className="primary-button"
                                     >
-                                        Try Again
+                                        {t('upload.tryAgain')}
                                     </button>
                                 </div>
                             ) : (
-                                <img src='/images/resume-scan.gif' className="w-full" />
+                                <img src='/images/resume-scan.gif' className="w-1/2 mx-auto" />
                             )}
                         </>
                     ) : (
                         <>
-                            <h2>Drop your resume for an ATS csore and improvent tips</h2>
+                            <h2>{t('upload.subtitle')}</h2>
                         </>
                     )}
                     {!isProcessing && (
                         <form id="upload-form" onSubmit={handleSubmit} className="flex flex-col gap-4 mt-8">
                             <div className="form-div">
-                                <label htmlFor="company-name">Company Name</label>
-                                <input type="text" name="company-name" placeholder="Company name" id="company-name" />
+                                <label htmlFor="company-name">{t('upload.companyName')}</label>
+                                <input type="text" name="company-name" placeholder={t('upload.companyNamePlaceholder')} id="company-name" />
                             </div>
                             <div className="form-div">
-                                <label htmlFor="job-title">Job Title</label>
-                                <input type="text" name="job-title" placeholder="Job title" id="job-title" />
+                                <label htmlFor="job-title">{t('upload.jobTitle')}</label>
+                                <input type="text" name="job-title" placeholder={t('upload.jobTitlePlaceholder')} id="job-title" />
                             </div>
                             <div className="form-div">
-                                <label htmlFor="job-description">Job Description</label>
-                                <textarea rows={5} name="job-description" placeholder="Job description" id="job-description"></textarea>
+                                <label htmlFor="job-description">{t('upload.jobDescription')}</label>
+                                <textarea rows={5} name="job-description" placeholder={t('upload.jobDescriptionPlaceholder')} id="job-description"></textarea>
                             </div>
                             <div className="form-div">
-                                <label htmlFor="uploader">Upload Resume</label>
+                                <label htmlFor="uploader">{t('upload.uploadResume')}</label>
                                 <FileUploader onFileSelect={handleFileSelect}/>
                             </div>
                             <button type="submit" className="primary-button">
-                                <p>Analyze Resume</p>
+                                {t('upload.analyzeResume')}
                             </button>
                         </form>
                     )}

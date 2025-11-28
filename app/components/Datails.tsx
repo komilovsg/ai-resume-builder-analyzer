@@ -6,6 +6,7 @@ import {
   AccordionItem,
 } from "./Accordion";
 import { cn } from "~/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface TipItem {
   type: "good" | "improve";
@@ -105,13 +106,14 @@ function CategoryContent({ tips }: { tips: TipItem[] }) {
 }
 
 export default function Details({ feedback }: { feedback: Feedback }) {
+  const { t } = useTranslation();
   return (
     <div className="w-full rounded-2xl shadow-md bg-white p-4">
       <Accordion>
         <AccordionItem id="tone">
           <AccordionHeader itemId="tone">
             <CategoryHeader
-              title="Tone & Style"
+              title={t('resumeReview.categories.toneAndStyle')}
               categoryScore={feedback.toneAndStyle.score}
             />
           </AccordionHeader>
@@ -125,7 +127,7 @@ export default function Details({ feedback }: { feedback: Feedback }) {
         <AccordionItem id="content">
           <AccordionHeader itemId="content">
             <CategoryHeader
-              title="Content"
+              title={t('resumeReview.categories.content')}
               categoryScore={feedback.content.score}
             />
           </AccordionHeader>
@@ -139,7 +141,7 @@ export default function Details({ feedback }: { feedback: Feedback }) {
         <AccordionItem id="structure">
           <AccordionHeader itemId="structure">
             <CategoryHeader
-              title="Structure"
+              title={t('resumeReview.categories.structure')}
               categoryScore={feedback.structure.score}
             />
           </AccordionHeader>
@@ -153,7 +155,7 @@ export default function Details({ feedback }: { feedback: Feedback }) {
         <AccordionItem id="skills">
           <AccordionHeader itemId="skills">
             <CategoryHeader
-              title="Skills"
+              title={t('resumeReview.categories.skills')}
               categoryScore={feedback.skills.score}
             />
           </AccordionHeader>

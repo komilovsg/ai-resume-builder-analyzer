@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface AtsSuggestion {
     type: 'good' | 'improve'
@@ -11,6 +12,7 @@ interface AtsProps {
 }
 
 export default function ATS({ score, suggestions }: AtsProps) {
+    const { t } = useTranslation();
     const isStrong = score > 69
     const isGoodStart = !isStrong && score > 49
 
@@ -36,13 +38,13 @@ export default function ATS({ score, suggestions }: AtsProps) {
         <div className={`w-full rounded-2xl shadow-md bg-gradient-to-br ${gradientClass} to-white p-6 animate-in fade-in duration-700`}> 
             <div className="flex items-center gap-3">
                 <img src={iconSrc} alt="ATS status" className="w-8 h-8" />
-                <h3 className={`text-xl font-semibold ${headlineColor}`}>ATS Score - {score}/100</h3>
+                <h3 className={`text-xl font-semibold ${headlineColor}`}>{t('resumeReview.ats.score')} - {score}/100</h3>
             </div>
 
             <div className="mt-4 space-y-2">
-                <h4 className="text-lg font-medium">Applicant Tracking System compatibility</h4>
+                <h4 className="text-lg font-medium">{t('resumeReview.ats.title')}</h4>
                 <p className="text-sm text-gray-600">
-                    Below are quick recommendations tailored to improve your resume's match with automated screening systems.
+                    {t('resumeReview.ats.description')}
                 </p>
             </div>
 
@@ -60,7 +62,7 @@ export default function ATS({ score, suggestions }: AtsProps) {
             </ul>
 
             <p className="mt-5 text-sm text-gray-600">
-                Keep iterating—incremental improvements can significantly boost your ATS compatibility.
+                {t('resumeReview.ats.footer')}
             </p>
         </div>
     )

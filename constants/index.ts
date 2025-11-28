@@ -230,11 +230,15 @@ export const AIResponseFormat = `
 export const prepareInstructions = ({
     jobTitle,
     jobDescription,
+    language = 'en',
 }: {
     jobTitle: string;
     jobDescription: string;
-}) =>
-    `You are an expert in ATS (Applicant Tracking System) and resume analysis.
+    language?: string;
+}) => {
+    const isRussian = language.startsWith('ru');
+    
+    const englishPrompt = `You are an expert in ATS (Applicant Tracking System) and resume analysis.
     Please analyze and rate this resume and suggest how to improve it.
     The rating can be low if the resume is bad.
     Be thorough and detailed. Don't be afraid to point out any mistakes or areas for improvement.
@@ -245,4 +249,22 @@ export const prepareInstructions = ({
     The job description is: ${jobDescription}
     Provide the feedback using the following format: ${AIResponseFormat}
     Return the analysis as a JSON object, without any other text and without the backticks.
-    Do not include any other text or comments.`;
+    Do not include any other text or comments.
+    IMPORTANT: Respond in English and provide all feedback, tips, and explanations in English.`;
+
+    const russianPrompt = `Вы являетесь экспертом в области ATS (Applicant Tracking System) и анализа резюме.
+    Пожалуйста, проанализируйте и оцените это резюме и предложите, как его улучшить.
+    Рейтинг может быть низким, если резюме плохое.
+    Будьте тщательными и подробными. Не бойтесь указывать на ошибки или области для улучшения.
+    Если есть много что улучшить, не стесняйтесь ставить низкие оценки. Это поможет пользователю улучшить свое резюме.
+    Если доступно, используйте описание вакансии, на которую пользователь претендует, чтобы дать более подробную обратную связь.
+    Если предоставлено, учитывайте описание вакансии.
+    Название должности: ${jobTitle}
+    Описание вакансии: ${jobDescription}
+    Предоставьте обратную связь, используя следующий формат: ${AIResponseFormat}
+    Верните анализ в виде JSON объекта, без какого-либо другого текста и без обратных кавычек.
+    Не включайте никакой другой текст или комментарии.
+    ВАЖНО: Отвечайте на русском языке и предоставляйте всю обратную связь, советы и объяснения на русском языке.`;
+
+    return isRussian ? russianPrompt : englishPrompt;
+};

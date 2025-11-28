@@ -196,7 +196,7 @@ export default function Home() {
         {!loadingResumes && (oldResumes.length > 0 || newResumes.length > 0) && (
           <>
             {oldResumes.length > 0 && (
-              <div className="w-full max-w-6xl">
+              <div className="w-fullNamePlaceholder">
                 <h2 className="text-2xl font-bold mb-4 text-center">{t('home.analyzedResumes')}</h2>
                 <div className="resumes-section">
                   {oldResumes.map((resume) => (
@@ -212,7 +212,7 @@ export default function Home() {
             )}
 
             {newResumes.length > 0 && (
-              <div className="w-full max-w-6xl mt-8">
+              <div className="w-full mt-8">
                 <h2 className="text-2xl font-bold mb-4 text-center">{t('home.createdResumes')}</h2>
                 <div className="resumes-section">
                   {newResumes.map((resume) => (

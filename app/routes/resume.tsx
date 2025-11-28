@@ -4,6 +4,7 @@ import ATS from "~/components/ATS";
 import Details from "~/components/Datails";
 import Summary from "~/components/Summary";
 import { usePuterStore } from "~/lib/puter";
+import { useTranslation } from "react-i18next";
 
 export const meta = () => {
   [
@@ -15,6 +16,7 @@ export const meta = () => {
 export default function Resume() {
   const { auth, isLoading, kv, fs } = usePuterStore();
   const { id } = useParams();
+  const { t } = useTranslation();
   const [imageUrl, setImageUrl] = useState("");
   const [resumeUrl, setResumeUrl] = useState("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -58,7 +60,7 @@ export default function Resume() {
         <Link to="/" className="back-button">
           <img src="/icons/back.svg" alt="logo" className="w-2.5 h-2.5" />
           <span className="text-gray-800 text-sm font-semibold">
-            Back to Homepage
+            {t('resumeReview.backToHomepage')}
           </span>
         </Link>
       </nav>
@@ -70,14 +72,14 @@ export default function Resume() {
                 <img
                   src={imageUrl}
                   className="w-full h-full object-contain rounded-2xl"
-                  title="Resume"
+                  title={t('resumeReview.title')}
                 />
               </a>
             </div>
           )}
         </section>
         <section className="feedback-section">
-          <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
+          <h2 className="text-4xl !text-black font-bold">{t('resumeReview.title')}</h2>
           {feedback ? (
             <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
                 <Summary feedback={feedback} />

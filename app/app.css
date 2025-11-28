@@ -185,7 +185,7 @@ form {
     @apply inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/30 text-current;
   }
   .resumes-section {
-    @apply flex flex-wrap max-md:flex-col max-md:gap-4 gap-6 items-start max-md:items-center w-full max-w-[1850px] justify-evenly;
+    @apply flex flex-wrap max-md:flex-col max-md:gap-2 gap-6 items-start max-md:items-center w-full justify-around;
   }
 
   .resume-card {
