@@ -34,64 +34,125 @@ export default function ResumePreview({ resumeData, onContentRef }: ResumePrevie
     // Сохраняем оригинальные стили для восстановления
     const originalStyles: Array<{ el: HTMLElement; prop: string; value: string }> = [];
     
+    // Функция для конвертации oklch/oklab/lab цвета в RGB через canvas
+    const convertColorToRGB = (colorValue: string, fallback: string): string => {
+      if (!colorValue || (!colorValue.includes("oklch") && !colorValue.includes("oklab") && !colorValue.includes("lab("))) {
+        return colorValue;
+      }
+      
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return fallback;
+        
+        ctx.fillStyle = colorValue;
+        const rgb = ctx.fillStyle;
+        // Если canvas вернул oklch обратно, используем fallback
+        if (rgb.includes("oklch") || rgb.includes("oklab") || rgb.includes("lab(")) {
+          return fallback;
+        }
+        return rgb;
+      } catch {
+        return fallback;
+      }
+    };
+    
+    // Функция для замены oklch цветов в строке (для градиентов, теней и т.д.)
+    const replaceOklchInString = (str: string): string => {
+      if (!str) return str;
+      
+      // Регулярное выражение для поиска oklch/oklab/lab функций
+      const oklchPattern = /(oklch|oklab|lab)\([^)]+\)/gi;
+      
+      return str.replace(oklchPattern, (match) => {
+        try {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return "#000000";
+          
+          ctx.fillStyle = match;
+          const rgb = ctx.fillStyle;
+          if (rgb.includes("oklch") || rgb.includes("oklab") || rgb.includes("lab(")) {
+            return "#000000"; // Fallback
+          }
+          return rgb;
+        } catch {
+          return "#000000";
+        }
+      });
+    };
+    
     // Функция для обхода всех элементов и замены oklch цветов
     const replaceOklchColors = (node: HTMLElement) => {
       const computed = window.getComputedStyle(node);
       
-      // Проверяем и заменяем color
-      if (computed.color && (computed.color.includes("oklch") || computed.color.includes("oklab") || computed.color.includes("lab"))) {
-        originalStyles.push({ el: node, prop: "color", value: node.style.color });
-        // Используем canvas для конвертации цвета в RGB
-        try {
-          const ctx = document.createElement("canvas").getContext("2d");
-          if (ctx) {
-            ctx.fillStyle = computed.color;
-            node.style.color = ctx.fillStyle as string;
-          } else {
-            node.style.color = "#000000"; // Fallback на черный
-          }
-        } catch {
-          node.style.color = "#000000";
-        }
-      }
+      // Список всех CSS-свойств, которые могут содержать цвета
+      const colorProperties = [
+        'color',
+        'backgroundColor',
+        'borderColor',
+        'borderTopColor',
+        'borderRightColor',
+        'borderBottomColor',
+        'borderLeftColor',
+        'outlineColor',
+        'textDecorationColor',
+        'columnRuleColor',
+      ];
       
-      // Проверяем и заменяем backgroundColor
-      if (computed.backgroundColor && (computed.backgroundColor.includes("oklch") || computed.backgroundColor.includes("oklab") || computed.backgroundColor.includes("lab"))) {
-        originalStyles.push({ el: node, prop: "backgroundColor", value: node.style.backgroundColor });
-        try {
-          const ctx = document.createElement("canvas").getContext("2d");
-          if (ctx) {
-            ctx.fillStyle = computed.backgroundColor;
-            node.style.backgroundColor = ctx.fillStyle as string;
-          } else {
-            node.style.backgroundColor = "#ffffff"; // Fallback на белый
-          }
-        } catch {
-          node.style.backgroundColor = "#ffffff";
+      // Обрабатываем простые цветовые свойства
+      colorProperties.forEach(prop => {
+        const value = computed.getPropertyValue(prop) || (computed as any)[prop];
+        if (value && (value.includes("oklch") || value.includes("oklab") || value.includes("lab("))) {
+          originalStyles.push({ 
+            el: node, 
+            prop: prop.replace(/([A-Z])/g, '-$1').toLowerCase(), 
+            value: node.style.getPropertyValue(prop) || '' 
+          });
+          const convertedColor = convertColorToRGB(value, 
+            prop === 'color' ? '#000000' : 
+            prop === 'backgroundColor' ? '#ffffff' : '#cccccc'
+          );
+          node.style.setProperty(prop.replace(/([A-Z])/g, '-$1').toLowerCase(), convertedColor);
         }
-      }
+      });
       
-      // Проверяем и заменяем borderColor
-      if (computed.borderColor && (computed.borderColor.includes("oklch") || computed.borderColor.includes("oklab") || computed.borderColor.includes("lab"))) {
-        originalStyles.push({ el: node, prop: "borderColor", value: node.style.borderColor });
-        try {
-          const ctx = document.createElement("canvas").getContext("2d");
-          if (ctx) {
-            ctx.fillStyle = computed.borderColor;
-            node.style.borderColor = ctx.fillStyle as string;
-          } else {
-            node.style.borderColor = "#cccccc"; // Fallback на серый
-          }
-        } catch {
-          node.style.borderColor = "#cccccc";
+      // Обрабатываем сложные свойства с градиентами и тенями
+      const complexProperties = [
+        { prop: 'background', propName: 'background' },
+        { prop: 'backgroundImage', propName: 'background-image' },
+        { prop: 'boxShadow', propName: 'box-shadow' },
+        { prop: 'textShadow', propName: 'text-shadow' },
+      ];
+      
+      complexProperties.forEach(({ prop, propName }) => {
+        const value = computed.getPropertyValue(propName) || (computed as any)[prop];
+        if (value && (value.includes("oklch") || value.includes("oklab") || value.includes("lab("))) {
+          originalStyles.push({ 
+            el: node, 
+            prop: propName, 
+            value: node.style.getPropertyValue(propName) || '' 
+          });
+          const convertedValue = replaceOklchInString(value);
+          node.style.setProperty(propName, convertedValue);
         }
-      }
+      });
       
       // Рекурсивно обрабатываем дочерние элементы
       for (const child of Array.from(node.children)) {
         if (child instanceof HTMLElement) {
           replaceOklchColors(child);
         }
+      }
+      
+      // Обрабатываем псевдоэлементы (если они есть)
+      try {
+        const before = window.getComputedStyle(node, '::before');
+        const after = window.getComputedStyle(node, '::after');
+        // Псевдоэлементы сложнее обработать, но мы можем попробовать через CSS
+        // Для надежности лучше избегать oklch в псевдоэлементах
+      } catch (e) {
+        // Игнорируем ошибки с псевдоэлементами
       }
     };
     
@@ -109,20 +170,109 @@ export default function ResumePreview({ resumeData, onContentRef }: ResumePrevie
         throw new Error("Элемент резюме не найден");
       }
 
-      // Заменяем oklch цвета перед рендерингом
+      // Обрабатываем CSS переменные (custom properties) в корневом элементе
+      const root = document.documentElement;
+      const rootStyles = window.getComputedStyle(root);
+      const cssVarReplacements: Array<{ name: string; value: string }> = [];
+      
+      try {
+        // Получаем все CSS переменные
+        const allStyles = rootStyles.cssText?.split(';') || [];
+        for (const style of allStyles) {
+          if (style.includes('--') && style.includes(':')) {
+            const match = style.match(/--([^:]+):\s*(.+)/);
+            if (match) {
+              const varName = match[1].trim();
+              let varValue = match[2].trim();
+              if (varValue && (varValue.includes("oklch") || varValue.includes("oklab") || varValue.includes("lab("))) {
+                const converted = replaceOklchInString(varValue);
+                if (converted !== varValue) {
+                  cssVarReplacements.push({ name: `--${varName}`, value: root.style.getPropertyValue(`--${varName}`) });
+                  root.style.setProperty(`--${varName}`, converted);
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Could not process CSS variables:", e);
+      }
+      
+      // Заменяем oklch цвета в элементах перед рендерингом
       replaceOklchColors(element);
 
-      // Конвертируем HTML в canvas
+      // Конвертируем HTML в canvas с дополнительными опциями для избежания проблем с oklch
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
+        ignoreElements: (element) => {
+          // Игнорируем элементы, которые могут вызывать проблемы
+          return false;
+        },
+        onclone: (clonedDoc) => {
+          // Дополнительная обработка клонированного документа
+          // Обрабатываем все элементы в клонированном документе
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach((el) => {
+            if (el instanceof HTMLElement) {
+              const computed = clonedDoc.defaultView?.getComputedStyle(el);
+              if (!computed) return;
+              
+              // Список свойств, которые могут содержать oklch
+              const colorProps = [
+                'color', 'background-color', 'border-color', 'border-top-color',
+                'border-right-color', 'border-bottom-color', 'border-left-color',
+                'outline-color', 'text-decoration-color', 'column-rule-color'
+              ];
+              
+              const complexProps = [
+                'background', 'background-image', 'box-shadow', 'text-shadow'
+              ];
+              
+              // Обрабатываем простые цветовые свойства
+              colorProps.forEach(prop => {
+                const value = computed.getPropertyValue(prop);
+                if (value && (value.includes("oklch") || value.includes("oklab") || value.includes("lab("))) {
+                  const converted = convertColorToRGB(value, "#000000");
+                  el.style.setProperty(prop, converted);
+                }
+              });
+              
+              // Обрабатываем сложные свойства
+              complexProps.forEach(prop => {
+                const value = computed.getPropertyValue(prop);
+                if (value && (value.includes("oklch") || value.includes("oklab") || value.includes("lab("))) {
+                  const converted = replaceOklchInString(value);
+                  el.style.setProperty(prop, converted);
+                }
+              });
+            }
+          });
+        },
       });
       
-      // Восстанавливаем оригинальные стили
+      // Восстанавливаем оригинальные стили элементов
       originalStyles.forEach(({ el, prop, value }) => {
-        (el.style as any)[prop] = value;
+        if (value) {
+          el.style.setProperty(prop, value);
+        } else {
+          el.style.removeProperty(prop);
+        }
+      });
+      
+      // Восстанавливаем CSS переменные
+      cssVarReplacements.forEach(({ name, value }) => {
+        try {
+          if (value) {
+            root.style.setProperty(name, value);
+          } else {
+            root.style.removeProperty(name);
+          }
+        } catch (e) {
+          // Игнорируем ошибки восстановления
+        }
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -246,7 +396,7 @@ export default function ResumePreview({ resumeData, onContentRef }: ResumePrevie
       {/* Resume Preview */}
       <div
         ref={assignResumeRef}
-        className="bg-white shadow-lg rounded-lg p-8 mb-8 resume-content-card"
+        className="bg-white shadow-lg rounded-lg p-8 mb-8 resume-content-card w-full md:w-[90%] mx-auto"
       >
         {renderResume()}
       </div>
